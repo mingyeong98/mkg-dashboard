@@ -17,12 +17,14 @@
       <div class="lbl">최근 수정</div><div id="sUpd" style="font-size:11.5px;margin-top:3px">-</div>
       <div class="lbl">접속 상태</div><div class="pill" id="sConn">연결 중…</div>
     </div>
+    <div class="stat" id="spaceBox"></div>
+    <button class="btn wide" id="themeBtn">라이트 스타일로 보기</button>
     <div id="tierNav"></div>
   </aside>
   <main>
     <div class="card head">
       <div class="eyebrow">RANK BOARD</div>
-      <h1>MKG 전적 대시보드</h1>
+      <h1>MKG 전적 대시보드<span id="spaceTitle" class="stitle"></span></h1>
       <p>티어별 유저 전적을 한눈에 확인하고, 관리자 권한으로 전적을 추가 및 관리할 수 있습니다.</p>
     </div>
     <div class="card search">
@@ -43,6 +45,7 @@
     <button class="big b1" id="loginBtn">관리자 로그인</button>
     <button class="big b2" id="addBtn">전적 추가</button>
     <button class="big b3" id="delBtn">전적 선택 삭제</button>
+    <a class="big b4" href="draft/">팀뽑기 (드래프트)</a>
     <button class="big b1" id="acctBtn" style="padding:11px 10px;font-size:12px">계정 관리</button>
     <div class="who" id="who"></div>
   </div>

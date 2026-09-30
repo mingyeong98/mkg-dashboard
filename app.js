@@ -1,5 +1,8 @@
-var DATA=null, TOKEN=null, SEL={}, SELMODE=false;
-try{ TOKEN=sessionStorage.getItem('bkg_tok'); }catch(e){}
+var DATA=null, TOKEN=null, SEL={}, SELMODE=false, CUR_SPACE='';
+try{ TOKEN=sessionStorage.getItem('bkg_tok'); CUR_SPACE=sessionStorage.getItem('mkg_space')||''; }catch(e){}
+function isLight(){ return document.body.classList.contains('light'); }
+function applyTheme(t){ document.body.classList.toggle('light', t==='light'); var b=document.getElementById('themeBtn'); if(b) b.textContent = t==='light' ? '다크 스타일로 보기' : '라이트 스타일로 보기'; try{ localStorage.setItem('mkg_theme', t); }catch(e){} if(DATA) render(); }
+(function(){ var t='dark'; try{ t=localStorage.getItem('mkg_theme')||'dark'; }catch(e){} applyTheme(t); })();
 function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
 function toast(m){var t=document.createElement('div');t.className='toast';t.textContent=m;document.body.appendChild(t);setTimeout(function(){t.remove();},2200);}
 function run(fn,args,cb){
@@ -8,10 +11,12 @@ function run(fn,args,cb){
     .then(function(j){ if(!j.ok) throw new Error(j.error); cb(j.data); })
     .catch(function(e){ toast('오류: '+(e&&e.message||e)); var c=document.getElementById('sConn'); if(c) c.textContent='연결 오류'; var g=document.getElementById('gErr'); if(g && !document.getElementById('gate').classList.contains('hide')) g.textContent='서버에 연결할 수 없습니다. 잠시 후 다시 시도해주세요.'; });
 }
-function load(){ run('getBoard',[TOKEN],function(d){ if(!d.auth){ showGate(); return; } hideGate(); DATA=d; document.getElementById('who').textContent=d.me.id+' ('+(d.me.role==='master'?'마스터':'관리자')+')';d.members.forEach(function(m,i){m._i=i;});render();document.getElementById('sConn').textContent='시트 연결 완료';}); }
+function isMaster(){ return !!(DATA&&DATA.me&&DATA.me.role==='master'); }
+function load(){ run('getBoard',[TOKEN,CUR_SPACE],function(d){ if(!d.auth){ showGate(); return; } hideGate(); DATA=d; CUR_SPACE=d.space||''; try{ sessionStorage.setItem('mkg_space',CUR_SPACE); }catch(e){} document.getElementById('who').textContent=d.me.id+' ('+(d.me.role==='master'?'마스터':'관리자 · '+d.me.space)+')';d.members.forEach(function(m,i){m._i=i;});render();document.getElementById('sConn').textContent='시트 연결 완료';}); }
 function hx(h){h=String(h||'#888888').replace('#','');if(h.length===3)h=h.split('').map(function(x){return x+x;}).join('');var n=parseInt(h,16);return [(n>>16)&255,(n>>8)&255,n&255];}
 function rgba(h,a){var c=hx(h);return 'rgba('+c[0]+','+c[1]+','+c[2]+','+a+')';}
 function lite(h,t){var c=hx(h).map(function(x){return Math.round(x+(255-x)*t);});return 'rgb('+c.join(',')+')';}
+function tcol(h){ if(!isLight()) return lite(h,.35); var c=hx(h).map(function(x){return Math.round(x*0.55);}); return 'rgb('+c.join(',')+')'; }
 function gcol(g){return (DATA.colors&&DATA.colors.groups[g])||'#f5c451';}
 function scol(g,s){return (DATA.colors&&DATA.colors.subs[g+'|'+s])||{bg:'#2a2410',fg:'#f5c451'};}
 function rate(m){var t=m.w+m.l;return t?m.w/t:0;}
@@ -33,10 +38,16 @@ function render(){
   document.getElementById('loginBtn').textContent='관리자 로그아웃'; document.getElementById('acctBtn').textContent=(DATA.me&&DATA.me.role==='master')?'계정 관리 (마스터)':'계정 관리';
   document.getElementById('addBtn').classList.toggle('hide',!isAdmin());
   document.getElementById('delBtn').classList.toggle('hide',!isAdmin());
+  var sb=document.getElementById('spaceBox');
+  if(isMaster()){
+    sb.innerHTML='<div class="lbl" style="margin-top:0">카테고리 (마스터)</div><select id="spaceSel" class="ssel"><option value="">전체 보기</option>'+d.spaces.map(function(x){return '<option value="'+esc(x)+'"'+(x===d.space?' selected':'')+'>'+esc(x)+'</option>';}).join('')+'</select>';
+    document.getElementById('spaceSel').onchange=function(){ CUR_SPACE=this.value; SEL={}; load(); };
+  } else sb.innerHTML='<div class="lbl" style="margin-top:0">내 카테고리</div><div class="stag">'+esc(d.me.space)+'</div>';
+  document.getElementById('spaceTitle').textContent = d.space ? ' · '+d.space : (isMaster()?' · 전체':'');
   var pts={}; d.tiers.forEach(function(t){pts[t.key]=t;});
   var nav='';
   d.groups.forEach(function(g){
-    nav+='<div class="tgrp" style="border-color:'+rgba(gcol(g.g),.45)+'"><h4 style="color:'+lite(gcol(g.g),.35)+';background:'+rgba(gcol(g.g),.18)+'">'+esc(g.g)+'</h4><div class="tgrid">';
+    nav+='<div class="tgrp" style="border-color:'+rgba(gcol(g.g),.45)+'"><h4 style="color:'+tcol(gcol(g.g))+';background:'+rgba(gcol(g.g),.18)+'">'+esc(g.g)+'</h4><div class="tgrid">';
     g.subs.forEach(function(s){var t=pts[g.g+'|'+s]||{};var p=(t.pts===''||t.pts==null)?'':' ('+t.pts+')';
       var sc=scol(g.g,s);nav+='<div style="box-shadow:inset 3px 0 0 '+sc.bg+'" onclick="jump(\''+esc(g.g+'_'+s)+'\')">'+esc(s)+p+'</div>';});
     nav+='</div></div>';
@@ -47,7 +58,7 @@ function render(){
   d.groups.forEach(function(g){
     var gm=d.members.filter(function(m){return m.g===g.g && (!q||m.name.indexOf(q)>=0);});
     if(q && !gm.length) return;
-    html+='<section class="card tier" style="border-color:'+rgba(gcol(g.g),.4)+'"><div class="th" style="background:linear-gradient(90deg,'+rgba(gcol(g.g),.32)+',rgba(22,26,20,.2) 70%)"><h2 style="color:'+lite(gcol(g.g),.35)+'">'+esc(g.g)+'</h2><span class="cnt">'+gm.length+'명</span></div>';
+    html+='<section class="card tier" style="border-color:'+rgba(gcol(g.g),.4)+'"><div class="th" style="background:linear-gradient(90deg,'+rgba(gcol(g.g),.32)+','+(isLight()?'rgba(255,255,255,0) 78%':'rgba(22,26,20,.2) 70%')+')"><h2 style="color:'+tcol(gcol(g.g))+'">'+esc(g.g)+'</h2><span class="cnt">'+gm.length+'명</span></div>';
     g.subs.forEach(function(s){
       var sm=gm.filter(function(m){return m.s===s;});
       if(q && !sm.length) return;
@@ -57,13 +68,13 @@ function render(){
       sm.forEach(function(m){
         var chips=m.recent.map(function(r){var k=r.row+'';return '<div class="chip '+(r.res==='승'?'W':'L')+(SEL[k]?' sel':'')+'" title="'+esc(r.game)+'" onclick="pick('+r.row+','+m._i+',this)">'+esc(r.res)+'</div>';}).join('');
         var ix=m._i;
-        html+='<div class="pl" style="border-left:3px solid '+scol(m.g,m.s).bg+'"><div class="nm"><span class="badge" style="background:'+scol(m.g,m.s).bg+';color:'+scol(m.g,m.s).fg+';border-color:transparent">'+esc(shortName(m.name))+'</span><div class="full">'+esc(m.name)+'</div></div>'+
+        html+='<div class="pl" style="border-left:3px solid '+scol(m.g,m.s).bg+'"><div class="nm"><span class="badge" style="background:'+scol(m.g,m.s).bg+';color:'+scol(m.g,m.s).fg+';border-color:transparent">'+esc(shortName(m.name))+'</span><div class="full">'+esc(m.name)+'</div>'+(isMaster()&&!d.space?'<div class="sptag">'+esc(m.space)+'</div>':'')+'</div>'+
           '<div class="chips">'+(chips||'<span class="empty" style="grid-column:1/-1;padding:0">전적 없음</span>')+'</div>'+
           '<div class="nums"><div class="num">'+m.w+'승</div><div class="num">'+m.l+'패</div><div class="num">'+pct(rate(m))+'</div></div>'+
           '<div class="acts'+(isAdmin()?'':' hide')+'">'+
           '<button onclick="pa('+ix+',\'W\')">승</button><button onclick="pa('+ix+',\'L\')">패</button>'+
           '<button onclick="pa('+ix+',\'undo\')">취소</button><button class="y" onclick="pa('+ix+',\'reset\')">초기화</button>'+
-          '<button onclick="pa('+ix+',\'rename\')">수정</button><button onclick="pa('+ix+',\'move\')">이동</button>'+
+          '<button onclick="pa('+ix+',\'rename\')">수정</button><button onclick="pa('+ix+',\'move\')">이동</button>'+(isMaster()?'<button onclick="pa('+ix+',\'space\')">카테고리</button>':'')+
           '<button class="r" onclick="pa('+ix+',\'delete\')">삭제</button></div></div>';
       });
       html+='</div>';
@@ -73,16 +84,19 @@ function render(){
   document.getElementById('board').innerHTML=html||'<div class="card load">검색 결과가 없습니다</div>';
   document.getElementById('board').classList.toggle('selmode',SELMODE);
   var rk=d.members.filter(function(m){return m.w+m.l>0;}).sort(function(a,b){return rate(b)-rate(a)||b.w-a.w||(b.w+b.l)-(a.w+a.l);}).slice(0,10);
-  document.getElementById('rankList').innerHTML=rk.map(function(m,i){return '<div class="ri"><div class="n">'+(i+1)+'</div><div><b>'+esc(m.name)+'</b><div class="s" style="color:'+lite(scol(m.g,m.s).bg,.3)+'">'+esc(m.g==='BABY'||m.g==='미배정'?m.g:m.g+' '+m.s)+'</div></div><div class="p">'+pct(rate(m))+'<span>'+m.w+'승 '+m.l+'패</span></div></div>';}).join('');
+  document.getElementById('rankList').innerHTML=rk.map(function(m,i){return '<div class="ri"><div class="n">'+(i+1)+'</div><div><b>'+esc(m.name)+'</b><div class="s" style="color:'+tcol(scol(m.g,m.s).bg)+'">'+esc(m.g==='BABY'||m.g==='미배정'?m.g:m.g+' '+m.s)+'</div></div><div class="p">'+pct(rate(m))+'<span>'+m.w+'승 '+m.l+'패</span></div></div>';}).join('');
 }
 function pa(i,k){var n=DATA.members[i].name;
   if(k==='W') act('result',{name:n,res:'승'}); else if(k==='L') act('result',{name:n,res:'패'});
   else if(k==='undo') act('undo',{name:n},'마지막 전적 취소');
   else if(k==='reset'){ if(confirm(n+' 전적을 모두 초기화할까요?')) act('reset',{name:n},'초기화 완료'); }
   else if(k==='delete'){ if(confirm(n+' 멤버를 삭제할까요? (전적 기록은 남습니다)')) act('delete',{name:n},'삭제 완료'); }
-  else if(k==='rename') renameM(i); else if(k==='move') moveM(i);}
+  else if(k==='rename') renameM(i); else if(k==='move') moveM(i); else if(k==='space') spaceM(i);}
+function spaceOpts(sel){ return DATA.spaces.map(function(x){return '<option value="'+esc(x)+'"'+(x===sel?' selected':'')+'>'+esc(x)+'</option>';}).join(''); }
+function spaceM(i){var m=DATA.members[i];modal('<h3>카테고리 이동 · '+esc(m.name)+'</h3><label>옮길 카테고리</label><select id="mS">'+spaceOpts(m.space)+'</select><div class="f"><button class="btn" onclick="closeM()">취소</button><button class="btn" id="mOk">이동</button></div>');
+  document.getElementById('mOk').onclick=function(){var v=document.getElementById('mS').value;closeM();act('setSpace',{name:m.name,to:v},'카테고리를 옮겼습니다');};}
 function jump(id){var e=document.getElementById(id);if(e)e.scrollIntoView({behavior:'smooth',block:'start'});}
-function act(a,args,msg){ if(!TOKEN){toast('관리자 로그인이 필요합니다');return;}
+function act(a,args,msg){ if(!TOKEN){toast('관리자 로그인이 필요합니다');return;} args=args||{}; if(args.space==null) args.space=CUR_SPACE;
   run('adminAction',[TOKEN,a,args],function(r){ if(!r.ok){ if(/로그인/.test(r.msg)){TOKEN=null;try{sessionStorage.removeItem('bkg_tok');}catch(e){} showGate();} toast(r.msg); render(); return;} toast(msg||'저장되었습니다'); load(); }); }
 function tierOptions(sel){var o='';DATA.groups.forEach(function(g){g.subs.forEach(function(s){var v=g.g+'|'+s;o+='<option value="'+esc(v)+'"'+(v===sel?' selected':'')+'>'+esc(g.g==='BABY'||g.g==='미배정'?g.g:g.g+' '+s)+'</option>';});});return o;}
 function modal(h){document.getElementById('modal').innerHTML='<div class="mb" onclick="if(event.target===this)closeM()"><div class="card md">'+h+'</div></div>';}
@@ -94,19 +108,30 @@ function moveM(i){var m=DATA.members[i];modal('<h3>티어 이동 · '+esc(m.name
 function pick(row,i,el){ if(!SELMODE) return; var name=DATA.members[i].name; var k=row+''; if(SEL[k]) delete SEL[k]; else SEL[k]={row:row,name:name}; el.classList.toggle('sel'); document.getElementById('selCnt').textContent=Object.keys(SEL).length; }
 document.getElementById('q').addEventListener('input',render);
 document.getElementById('allBtn').onclick=function(){document.getElementById('q').value='';render();};
-document.getElementById('loginBtn').onclick=function(){ run('logout',[TOKEN],function(){}); TOKEN=null; try{sessionStorage.removeItem('bkg_tok');}catch(e){} DATA=null; SELMODE=false; SEL={}; document.getElementById('selBar').classList.add('hide'); showGate(); };
+document.getElementById('loginBtn').onclick=function(){ run('logout',[TOKEN],function(){}); TOKEN=null; CUR_SPACE=''; try{sessionStorage.removeItem('bkg_tok');sessionStorage.removeItem('mkg_space');}catch(e){} DATA=null; SELMODE=false; SEL={}; document.getElementById('selBar').classList.add('hide'); showGate(); };
 document.getElementById('acctBtn').onclick=function(){
   var master=DATA&&DATA.me&&DATA.me.role==='master';
   var h='<h3>계정 관리</h3><label>내 비밀번호 변경</label><input id="cOld" type="password" placeholder="현재 비밀번호"><input id="cNew" type="password" placeholder="새 비밀번호 (6자 이상)" style="margin-top:6px"><div class="f" style="margin-top:8px"><button class="btn" id="cPw">비밀번호 변경</button></div>';
-  if(master) h+='<label style="margin-top:18px;color:var(--gold)">관리자 계정 (마스터 전용)</label><div id="cList" style="font-size:12px;color:var(--mut)">불러오는 중…</div><input id="aId" placeholder="새 관리자 아이디" style="margin-top:8px"><input id="aPw" type="password" placeholder="비밀번호 (6자 이상)" style="margin-top:6px"><div class="f" style="margin-top:8px"><button class="btn" id="cAdd">관리자 추가</button></div>';
+  if(master) h+='<label style="margin-top:18px;color:var(--gold)">카테고리 관리 (마스터 전용)</label><div class="hint">관리자는 배정된 카테고리의 멤버·전적만 볼 수 있습니다.</div><div id="cSp" style="font-size:12px;color:var(--mut)">불러오는 중…</div><div class="rowin"><input id="spN" placeholder="새 카테고리 이름"><button class="btn" id="spAdd">추가</button></div>'+
+    '<label style="margin-top:18px;color:var(--gold)">관리자 계정 (마스터 전용)</label><div id="cList" style="font-size:12px;color:var(--mut)">불러오는 중…</div><input id="aId" placeholder="새 관리자 아이디" style="margin-top:8px"><input id="aPw" type="password" placeholder="비밀번호 (6자 이상)" style="margin-top:6px"><select id="aSp" style="margin-top:6px"></select><div class="f" style="margin-top:8px"><button class="btn" id="cAdd">관리자 추가</button></div>';
   h+='<div class="f"><button class="btn" onclick="closeM()">닫기</button></div>';
   modal(h);
   document.getElementById('cPw').onclick=function(){ run('accountAction',[TOKEN,'changePw',{oldPw:document.getElementById('cOld').value,newPw:document.getElementById('cNew').value}],function(r){ toast(r.ok?'비밀번호가 변경되었습니다':r.msg); if(r.ok) closeM(); }); };
   if(master){
-    var refresh=function(){ run('accountAction',[TOKEN,'list',{}],function(r){ if(!r.ok){toast(r.msg);return;} document.getElementById('cList').innerHTML=r.list.map(function(u){ return '<div class="row" style="border:1px solid var(--line);border-radius:8px;padding:6px 10px"><span>'+esc(u.id)+' · '+(u.role==='master'?'마스터':'관리자')+'</span>'+(u.role==='master'?'':'<button class="btn" style="padding:4px 10px" data-id="'+esc(u.id)+'">삭제</button>')+'</div>'; }).join('');
-      Array.prototype.forEach.call(document.querySelectorAll('#cList button'),function(b){ b.onclick=function(){ var id=b.getAttribute('data-id'); if(confirm(id+' 계정을 삭제할까요?')) run('accountAction',[TOKEN,'remove',{id:id}],function(r){ toast(r.ok?'삭제되었습니다':r.msg); refresh(); }); }; }); }); };
+    var refresh=function(){ run('accountAction',[TOKEN,'list',{}],function(r){ if(!r.ok){toast(r.msg);return;}
+      var sps=r.spaces; DATA.spaces=sps;
+      var so=function(sel){ return sps.map(function(x){return '<option value="'+esc(x)+'"'+(x===sel?' selected':'')+'>'+esc(x)+'</option>';}).join(''); };
+      document.getElementById('cSp').innerHTML=sps.map(function(x){ return '<div class="row lrow"><span>'+esc(x)+'</span><span><button class="btn sbtn" data-ren="'+esc(x)+'">이름 변경</button> <button class="btn sbtn" data-del="'+esc(x)+'">삭제</button></span></div>'; }).join('');
+      document.getElementById('aSp').innerHTML=so(CUR_SPACE||sps[0]);
+      document.getElementById('cList').innerHTML=r.list.map(function(u){ return '<div class="row lrow"><span>'+esc(u.id)+' · '+(u.role==='master'?'마스터 (전체)':'관리자')+'</span>'+(u.role==='master'?'':'<span><select class="usp" data-id="'+esc(u.id)+'">'+so(u.space)+'</select> <button class="btn sbtn" data-rm="'+esc(u.id)+'">삭제</button></span>')+'</div>'; }).join('');
+      Array.prototype.forEach.call(document.querySelectorAll('#cList [data-rm]'),function(b){ b.onclick=function(){ var id=b.getAttribute('data-rm'); if(confirm(id+' 계정을 삭제할까요?')) run('accountAction',[TOKEN,'remove',{id:id}],function(r){ toast(r.ok?'삭제되었습니다':r.msg); refresh(); }); }; });
+      Array.prototype.forEach.call(document.querySelectorAll('#cList .usp'),function(sl){ sl.onchange=function(){ run('accountAction',[TOKEN,'setUserSpace',{id:sl.getAttribute('data-id'),space:sl.value}],function(r){ toast(r.ok?'담당 카테고리를 바꿨습니다':r.msg); refresh(); }); }; });
+      Array.prototype.forEach.call(document.querySelectorAll('#cSp [data-ren]'),function(b){ b.onclick=function(){ var o=b.getAttribute('data-ren'); var n=prompt('새 카테고리 이름',o); if(!n||n===o) return; run('accountAction',[TOKEN,'renameSpace',{from:o,to:n}],function(r){ toast(r.ok?'이름을 바꿨습니다':r.msg); if(r.ok&&CUR_SPACE===o) CUR_SPACE=n; refresh(); load(); }); }; });
+      Array.prototype.forEach.call(document.querySelectorAll('#cSp [data-del]'),function(b){ b.onclick=function(){ var n=b.getAttribute('data-del'); if(confirm(n+' 카테고리를 삭제할까요?')) run('accountAction',[TOKEN,'delSpace',{name:n}],function(r){ toast(r.ok?'삭제되었습니다':r.msg); if(r.ok&&CUR_SPACE===n) CUR_SPACE=''; refresh(); load(); }); }; });
+    }); };
     refresh();
-    document.getElementById('cAdd').onclick=function(){ run('accountAction',[TOKEN,'add',{id:document.getElementById('aId').value,pw:document.getElementById('aPw').value}],function(r){ toast(r.ok?'관리자가 추가되었습니다':r.msg); if(r.ok){ document.getElementById('aId').value=''; document.getElementById('aPw').value=''; refresh(); } }); };
+    document.getElementById('spAdd').onclick=function(){ run('accountAction',[TOKEN,'addSpace',{name:document.getElementById('spN').value}],function(r){ toast(r.ok?'카테고리를 추가했습니다':r.msg); if(r.ok){ document.getElementById('spN').value=''; refresh(); load(); } }); };
+    document.getElementById('cAdd').onclick=function(){ run('accountAction',[TOKEN,'add',{id:document.getElementById('aId').value,pw:document.getElementById('aPw').value,space:document.getElementById('aSp').value}],function(r){ toast(r.ok?'관리자가 추가되었습니다':r.msg); if(r.ok){ document.getElementById('aId').value=''; document.getElementById('aPw').value=''; refresh(); } }); };
   }
 };
 document.getElementById('addBtn').onclick=function(){
@@ -117,8 +142,9 @@ document.getElementById('addBtn').onclick=function(){
     '<div class="f"><button class="btn" onclick="closeM()">취소</button><button class="btn" id="aGo">저장</button></div>');
   document.getElementById('aGo').onclick=function(){var g=document.getElementById('aG').value; var sp=function(id){return document.getElementById(id).value.split(/[,\n]/).map(function(x){return x.trim();}).filter(String);}; var nn=document.getElementById('aN').value.trim(), v=document.getElementById('aT').value.split('|'), w=sp('aW'), l=sp('aL'); closeM();
     var after=function(){ if(w.length||l.length) act('addGame',{game:g,winners:w,losers:l},'전적이 추가되었습니다'); else load(); };
-    if(nn) run('adminAction',[TOKEN,'addMember',{name:nn,g:v[0],s:v[1]}],function(r){ if(!r.ok) toast(r.msg); else toast('멤버 등록 완료'); after(); }); else after(); };
+    if(nn) run('adminAction',[TOKEN,'addMember',{name:nn,g:v[0],s:v[1],space:CUR_SPACE}],function(r){ if(!r.ok) toast(r.msg); else toast('멤버 등록 완료'); after(); }); else after(); };
 };
+document.getElementById('themeBtn').onclick=function(){ applyTheme(isLight()?'dark':'light'); };
 document.getElementById('delBtn').onclick=function(){ SELMODE=true; SEL={}; document.getElementById('selCnt').textContent='0'; document.getElementById('selBar').classList.remove('hide'); render(); toast('삭제할 전적 칸을 클릭하세요'); };
 document.getElementById('selCancel').onclick=function(){ SELMODE=false; SEL={}; document.getElementById('selBar').classList.add('hide'); render(); };
 document.getElementById('selDo').onclick=function(){ var items=Object.keys(SEL).map(function(k){return SEL[k];}); if(!items.length){toast('선택된 전적이 없습니다');return;} if(!confirm(items.length+'개 전적을 삭제할까요?')) return; SELMODE=false; SEL={}; document.getElementById('selBar').classList.add('hide'); act('deleteRecords',{items:items},items.length+'개 전적 삭제'); };
