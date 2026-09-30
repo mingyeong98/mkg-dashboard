@@ -1,0 +1,1196 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PUBG Draft</title>
+<style>
+/* ══════ 파스텔 · 홀로그램 토큰 ══════ */
+:root{
+  --paper:#f6f4fc; --mist:#ffffff; --veil:rgba(255,255,255,.72);
+  --ink:#3a3452; --ink2:#6d6690; --faint:#a49dbd; --ghost:#c4bed8;
+  --edge:#ebe6f7; --edge2:#ddd6ef;
+  --mint:#a8ead6; --lilac:#cfbdf2; --peach:#ffd2c4; --sky:#bcdcff; --rose:#ffc2d4; --lemon:#fff2bf;
+  /* 진주빛 홀로그램 — 색을 늘리고 채도를 낮춰 유광 포일에 가깝게 */
+  --holo:linear-gradient(100deg,
+      #e8f0ff 0%, #ece4fb 14%, #fbe7f1 28%, #fff2e6 42%,
+      #e6f8f0 56%, #e4edff 70%, #efe6fc 84%, #e8f0ff 100%);
+  --holo-strong:linear-gradient(100deg,
+      #bed8fb 0%, #cfc2f0 13%, #f6c8dd 26%, #ffd8c0 39%,
+      #b9e8d7 52%, #c3d9fb 65%, #d3c4f1 78%, #bed8fb 100%);
+  --holo-veil:linear-gradient(100deg,
+      #f6f9ff 0%, #f6f3fe 20%, #fff6fa 40%, #fff9f4 60%, #f3fcf8 80%, #f6f9ff 100%);
+  /* 회절 격자 느낌의 미세한 결 */
+  --foil:repeating-linear-gradient(112deg,
+      rgba(255,255,255,.6) 0 1px, rgba(255,255,255,0) 1px 5px);
+  --shadow:0 6px 22px rgba(126,110,180,.13);
+  --shadow-lg:0 18px 50px rgba(110,94,170,.22);
+}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%}
+body{
+  background:
+    radial-gradient(900px 620px at 8% -10%, #ffe6ee 0%, transparent 62%),
+    radial-gradient(880px 640px at 96% 4%, #dff1ff 0%, transparent 60%),
+    radial-gradient(760px 700px at 50% 108%, #e2f8ef 0%, transparent 64%),
+    var(--paper);
+  background-attachment:fixed;
+  color:var(--ink);
+  font-family:"Pretendard","Apple SD Gothic Neo","Malgun Gothic","Noto Sans KR",system-ui,sans-serif;
+  font-size:14px; -webkit-font-smoothing:antialiased;
+}
+button{font-family:inherit;cursor:pointer}
+input,select,textarea{font-family:inherit;color:var(--ink)}
+.hidden{display:none !important}
+::selection{background:#e2d4fb}
+
+@keyframes holoDrift{0%{background-position:0% 50%}100%{background-position:300% 50%}}
+@keyframes sheen{
+  0%{transform:translateX(-170%) skewX(-16deg); opacity:0}
+  10%{opacity:.9}
+  46%{opacity:.9}
+  62%{opacity:0}
+  100%{transform:translateX(260%) skewX(-16deg); opacity:0}
+}
+.holo-bar{
+  position:relative; height:2px; overflow:hidden;
+  background:var(--holo-strong); background-size:300% 100%;
+  animation:holoDrift 28s linear infinite;
+  -webkit-mask-image:linear-gradient(90deg,transparent 0,#000 7%,#000 93%,transparent 100%);
+  mask-image:linear-gradient(90deg,transparent 0,#000 7%,#000 93%,transparent 100%);
+}
+.holo-bar::after{content:""; position:absolute; inset:0; background:var(--foil); opacity:.45}
+/* 같은 리듬으로 움직이면 싸구려 필름처럼 보여서, 요소마다 위상을 어긋나게 둡니다 */
+.teams .team:nth-child(6n+2) .holo-bar,.teams .team:nth-child(6n+2) .slot.captain{animation-delay:-5s}
+.teams .team:nth-child(6n+3) .holo-bar,.teams .team:nth-child(6n+3) .slot.captain{animation-delay:-11s}
+.teams .team:nth-child(6n+4) .holo-bar,.teams .team:nth-child(6n+4) .slot.captain{animation-delay:-17s}
+.teams .team:nth-child(6n+5) .holo-bar,.teams .team:nth-child(6n+5) .slot.captain{animation-delay:-23s}
+.teams .team:nth-child(6n+6) .holo-bar,.teams .team:nth-child(6n+6) .slot.captain{animation-delay:-29s}
+.sec:nth-of-type(2) .holo-bar{animation-delay:-9s}
+.sec:nth-of-type(3) .holo-bar{animation-delay:-18s}
+.sec:nth-of-type(4) .holo-bar{animation-delay:-24s}
+.entry-strip .echip:nth-child(4n+2){animation-delay:-11s}
+.entry-strip .echip:nth-child(4n+3){animation-delay:-22s}
+.entry-strip .echip:nth-child(4n+4){animation-delay:-33s}
+.btn.holo:nth-of-type(2)::after{animation-delay:-3.5s}
+
+/* ══════ 컨트롤 ══════ */
+.btn{
+  background:var(--mist); border:1px solid var(--edge2); color:var(--ink);
+  border-radius:9px; padding:6px 12px; font-size:12.5px; font-weight:600;
+  box-shadow:0 1px 2px rgba(120,105,170,.07); transition:.15s;
+}
+.btn:hover{border-color:#c9bfe6; box-shadow:0 4px 14px rgba(126,110,180,.16); transform:translateY(-1px)}
+.btn:active{transform:none}
+.btn:focus-visible{outline:2px solid #b39ff0; outline-offset:2px}
+.btn.holo{
+  position:relative; overflow:hidden; isolation:isolate;
+  background:var(--holo); background-size:300% 100%;
+  animation:holoDrift 24s linear infinite;
+  border-color:rgba(255,255,255,.9); color:#42395f; font-weight:700;
+  box-shadow:
+    0 1px 0 rgba(255,255,255,.95) inset,
+    0 0 0 1px rgba(174,152,228,.34),
+    0 5px 16px rgba(146,126,206,.18);
+}
+.btn.holo::before{
+  content:""; position:absolute; inset:0; z-index:-1;
+  background:var(--foil); opacity:.4; pointer-events:none;
+}
+.btn.holo::after{
+  content:""; position:absolute; top:-50%; bottom:-50%; left:0; width:34%; z-index:-1;
+  background:linear-gradient(90deg,transparent,rgba(255,255,255,.92),transparent);
+  transform:translateX(-170%) skewX(-16deg);
+  animation:sheen 8s cubic-bezier(.4,0,.2,1) infinite; pointer-events:none;
+}
+.btn.holo:hover{
+  border-color:rgba(255,255,255,.95);
+  box-shadow:
+    0 1px 0 rgba(255,255,255,.95) inset,
+    0 0 0 1px rgba(160,133,224,.5),
+    0 10px 26px rgba(140,118,204,.28);
+}
+.btn.holo:hover::after{animation-duration:2.6s}
+.btn.mint{border-color:#a4e2cd; background:#effbf7; color:#2f7f68}
+.btn.rose{border-color:#f6c2d1; background:#fff2f6; color:#b0526f}
+.btn.sky{border-color:#b9d8f7; background:#f0f7ff; color:#3f6ea4}
+.btn.ghost{background:transparent; border-color:transparent; color:var(--ink2)}
+.btn.ghost:hover{background:var(--veil)}
+.btn.sm{padding:4px 9px; font-size:11.5px; border-radius:7px}
+.fld{
+  width:100%; background:var(--mist); border:1px solid var(--edge2);
+  border-radius:9px; padding:9px 11px; font-size:13px; outline:none; transition:.15s;
+}
+.fld:focus{border-color:#bda6ee; box-shadow:0 0 0 3px rgba(189,166,238,.2)}
+.fld::placeholder{color:var(--ghost)}
+label.lbl{display:block; font-size:11px; color:var(--ink2); margin-bottom:5px; letter-spacing:.02em; font-weight:600}
+
+/* ══════ 로그인 ══════ */
+#screen-login{min-height:100%; display:flex; align-items:center; justify-content:center; padding:24px}
+.card-login{
+  width:352px; background:var(--mist); border:1px solid var(--edge);
+  border-radius:18px; padding:0 26px 26px; box-shadow:var(--shadow-lg); overflow:hidden;
+}
+.card-login .holo-bar{margin:0 -26px 24px}
+.card-login h1{margin:0 0 6px; font-size:23px; letter-spacing:-.02em}
+.card-login p.sub{margin:0 0 22px; font-size:12.5px; color:var(--ink2); line-height:1.5}
+.card-login .row{margin-bottom:14px}
+.err{color:#c9527a; font-size:12px; min-height:16px; margin:2px 0 8px}
+
+/* ══════ 상단 ══════ */
+.topbar{display:flex; align-items:center; justify-content:flex-end; gap:8px; padding:14px 18px 0}
+.topbar .save{font-size:11.5px; color:var(--faint); margin-right:auto; padding-left:4px}
+.wrap{max-width:2000px; margin:0 auto; padding:0 18px 48px}
+.toolrow{display:flex; align-items:center; justify-content:space-between; gap:8px; margin:12px 0 10px; flex-wrap:wrap}
+.toolrow .right{display:flex; gap:8px; flex-wrap:wrap}
+
+/* ══════ 설정 ══════ */
+.settings{
+  background:var(--veil); backdrop-filter:blur(8px);
+  border:1px solid var(--edge); border-radius:14px; box-shadow:var(--shadow);
+  padding:16px 18px; display:grid; gap:14px;
+  grid-template-columns:1.2fr 1.4fr 1fr .5fr .7fr .7fr;
+}
+@media(max-width:1100px){.settings{grid-template-columns:1fr 1fr}}
+.suffix{position:relative}
+.suffix span{position:absolute; right:11px; top:50%; transform:translateY(-50%); color:var(--faint); font-size:12px}
+
+.linebar{display:flex; align-items:center; justify-content:space-between; gap:8px; margin:14px 0 10px; flex-wrap:wrap}
+.linebar .grp{display:flex; gap:6px; flex-wrap:wrap}
+
+/* ══════ 팀 ══════ */
+.teams{display:grid; gap:12px}
+.team{
+  background:var(--mist); border:1px solid var(--edge); border-radius:14px;
+  box-shadow:var(--shadow); overflow:hidden;
+}
+.team .holo-bar{opacity:.85}
+.team .inner{padding:13px}
+.team h3{margin:0 0 11px; font-size:15px; font-weight:700; display:flex; justify-content:space-between; align-items:baseline}
+.team h3 em{font-style:normal; font-size:13px; font-weight:700; color:#7b6bb5}
+.slot-wrap{position:relative; margin-bottom:7px}
+.slot{
+  width:100%; background:#fbfaff; border:1px solid var(--edge2);
+  border-radius:9px; padding:9px 28px 9px 11px; font-size:13px; font-weight:600; outline:none; transition:.15s;
+}
+.slot::placeholder{color:var(--ghost); font-weight:400}
+.slot:focus{border-color:#bda6ee; box-shadow:0 0 0 3px rgba(189,166,238,.18)}
+.slot.filled{border-color:#cfc4ee; background:#f6f2ff}
+.slot.captain{
+  border-color:transparent; color:#332d4a; font-weight:700;
+  background:var(--holo); background-size:300% 100%;
+  animation:holoDrift 36s linear infinite;
+  box-shadow:
+    inset 0 0 0 1px rgba(255,255,255,.9),
+    inset 0 0 0 1.6px rgba(176,152,232,.42),
+    0 2px 8px rgba(150,128,210,.13);
+}
+.slot.dropping{border-color:#79d6b8; background:#eefbf6; box-shadow:0 0 0 3px rgba(121,214,184,.22)}
+.pin{position:absolute; right:9px; top:50%; transform:translateY(-50%); font-size:11px; pointer-events:none; color:#9b86d8}
+.ac{
+  position:absolute; z-index:60; left:0; right:0; top:100%; margin-top:4px;
+  background:var(--mist); border:1px solid var(--edge2); border-radius:11px;
+  max-height:200px; overflow:auto; box-shadow:var(--shadow-lg);
+}
+.ac div{padding:8px 11px; font-size:13px; display:flex; justify-content:space-between; gap:8px; cursor:pointer}
+.ac div:hover,.ac div.on{background:#f4efff}
+.ac div b{color:#8574c4; font-weight:700; font-size:11.5px}
+
+/* ══════ 보드 ══════ */
+.board{
+  background:var(--veil); backdrop-filter:blur(8px);
+  border:1px solid var(--edge); border-radius:14px; box-shadow:var(--shadow);
+  padding:16px; margin-top:14px;
+}
+.board-head{display:flex; align-items:center; justify-content:space-between; margin-bottom:11px}
+.board-head h4{margin:0; font-size:14px; letter-spacing:-.01em}
+.entry-strip{
+  display:flex; flex-wrap:wrap; gap:7px; min-height:38px; padding:8px;
+  border:1.5px dashed #d7cef0; border-radius:11px; margin-bottom:12px; background:#fcfbff;
+}
+.entry-strip:empty::after{content:"들어가기 셔플을 누르면 남은 선수가 여기에 배치됩니다."; color:var(--ghost); font-size:12px; padding:3px}
+.echip{
+  position:relative; overflow:hidden;
+  background:var(--holo); background-size:300% 100%;
+  animation:holoDrift 44s linear infinite;
+  border:1px solid rgba(255,255,255,.9); border-radius:9px; padding:6px 11px; font-size:13px; font-weight:700;
+  cursor:grab; user-select:none;
+  box-shadow:0 0 0 1px rgba(178,156,228,.3), 0 2px 7px rgba(140,120,200,.13);
+  transition:box-shadow .18s, transform .18s;
+}
+.echip::after{
+  content:""; position:absolute; top:-50%; bottom:-50%; left:0; width:40%;
+  background:linear-gradient(90deg,transparent,rgba(255,255,255,.85),transparent);
+  transform:translateX(-170%) skewX(-16deg); opacity:0; pointer-events:none;
+}
+.echip:hover{transform:translateY(-1px); box-shadow:0 0 0 1px rgba(162,136,226,.45), 0 7px 18px rgba(140,118,204,.22)}
+.echip:hover::after{animation:sheen 1.9s cubic-bezier(.4,0,.2,1)}
+.echip:active{cursor:grabbing}
+.echip.drag{opacity:.35}
+.echip .no{color:#9b93bb; font-size:11px; margin-right:6px; font-weight:600}
+
+.stats{display:flex; gap:8px; margin-bottom:13px; flex-wrap:wrap}
+.stat{font-size:12px; font-weight:700; padding:5px 12px; border-radius:99px; border:1px solid var(--edge2); background:var(--mist)}
+.stat.a{color:#4a7bb5; border-color:#c2ddf8; background:#f2f8ff}
+.stat.b{color:#2f8a70; border-color:#aae4d1; background:#f0fbf7}
+
+.pline{display:flex; align-items:center; gap:10px; padding:7px 0; border-bottom:1px solid #f0ecfa}
+.pline .score{width:96px; flex:none; font-weight:800; font-size:14px; color:#5c5480}
+.pline .score i{font-style:normal; color:var(--faint); font-weight:600; font-size:11.5px}
+.pline .names{display:flex; flex-wrap:wrap; gap:6px; align-items:center; flex:1}
+.pchip{
+  background:var(--mist); border:1px solid var(--edge2); border-radius:9px;
+  padding:5px 10px; font-size:13px; font-weight:700; box-shadow:0 1px 3px rgba(130,115,185,.1);
+}
+.pchip.taken{opacity:.42; background:#f5f2fb; border-style:dashed; box-shadow:none; text-decoration:line-through; text-decoration-color:#c3b8e4}
+.pchip.taken::after{content:"☆"; color:#a08fd9; margin-left:5px; font-size:11px; text-decoration:none; display:inline-block}
+.pchip .x{color:var(--ghost); margin-left:6px; cursor:pointer; font-weight:400}
+.pchip .x:hover{color:#d4638a}
+.addwrap{position:relative; min-width:124px}
+.add-in{background:transparent; border:1.5px dashed #ddd5f2; border-radius:9px; padding:5px 9px; font-size:12px; width:124px; outline:none}
+.add-in:focus{border-color:#bda6ee; border-style:solid}
+.newline{display:flex; align-items:center; gap:8px; margin-top:14px; flex-wrap:wrap}
+.newline .lb{font-size:12.5px; color:var(--ink2); font-weight:600}
+
+/* ══════ 플로팅 ══════ */
+.float{
+  position:fixed; z-index:200; background:var(--mist); border:1px solid var(--edge2);
+  border-radius:14px; box-shadow:var(--shadow-lg); display:flex; flex-direction:column; overflow:hidden;
+}
+.float-head{
+  display:flex; align-items:center; gap:10px; padding:10px 13px;
+  border-bottom:1px solid var(--edge); cursor:move; user-select:none;
+  background:var(--holo-veil); background-size:300% 100%;
+  animation:holoDrift 52s linear infinite;
+}
+.float-head .grip{color:#a99ed3; letter-spacing:-2px}
+.float-head .ttl{font-weight:700; font-size:13px}
+.float-head .cnt{color:var(--ink2); font-size:12px}
+.float-head .sp{flex:1}
+.float-head .slider{display:flex; align-items:center; gap:6px; font-size:11px; color:var(--ink2); font-weight:600}
+.float-head input[type=range]{accent-color:#a78de0}
+.float-body{padding:13px; overflow:auto; flex:1}
+.ta{
+  width:100%; background:#fbfaff; border:1px solid var(--edge2); border-radius:11px;
+  padding:11px; outline:none; resize:none; line-height:1.55;
+}
+.ta:focus{border-color:#bda6ee; box-shadow:0 0 0 3px rgba(189,166,238,.18)}
+.tiergrid{display:grid; grid-template-columns:1fr 1fr; gap:11px; margin-top:13px}
+.tierbox{background:#fbfaff; border:1px solid var(--edge); border-radius:12px; padding:11px; min-height:124px}
+.tierbox .h{display:flex; justify-content:space-between; font-size:12px; font-weight:700; margin-bottom:9px}
+.tierbox .h b{color:#8574c4}
+.tierbox .chips{display:flex; flex-wrap:wrap; gap:6px}
+.tchip{background:var(--mist); border:1px solid var(--edge2); border-radius:8px; padding:4px 9px; font-size:12px; font-weight:600}
+.tchip.no{border-style:dashed; color:#b07f9a; background:#fff7fa}
+.empty{color:var(--ghost); font-size:12px}
+
+/* ══════ 관리자 ══════ */
+.admin{max-width:1100px; margin:0 auto; padding:20px 18px 70px}
+.admin h2{font-size:20px; margin:0 0 4px; letter-spacing:-.02em}
+.sec{background:var(--mist); border:1px solid var(--edge); border-radius:14px; box-shadow:var(--shadow); margin-top:16px; overflow:hidden}
+.sec .inner{padding:18px}
+.sec h3{margin:0 0 13px; font-size:14px; color:#7b6bb5}
+table{width:100%; border-collapse:collapse; font-size:13px}
+th,td{text-align:left; padding:9px 7px; border-bottom:1px solid #f1edfa}
+th{color:var(--ink2); font-weight:700; font-size:11.5px}
+td input{background:#fbfaff; border:1px solid var(--edge2); border-radius:8px; padding:6px 9px; outline:none; width:100%}
+td input:focus{border-color:#bda6ee}
+.inline-form{display:flex; gap:9px; flex-wrap:wrap; align-items:flex-end; margin-top:13px}
+.inline-form .f{flex:1; min-width:120px}
+.tbl-wrap{max-height:360px; overflow:auto; border:1px solid var(--edge); border-radius:11px}
+.badge{font-size:11px; padding:3px 9px; border-radius:99px; border:1px solid var(--edge2); font-weight:600}
+.badge.ok{color:#2f8a70; border-color:#aae4d1; background:#f0fbf7}
+
+body.capture .hide-on-capture{display:none !important}
+
+.toast{
+  position:fixed; left:50%; bottom:28px; transform:translateX(-50%);
+  background:var(--mist); border:1px solid var(--edge2); color:var(--ink);
+  padding:10px 18px; border-radius:99px; font-size:13px; font-weight:600; z-index:900;
+  box-shadow:var(--shadow-lg); opacity:0; pointer-events:none; transition:.2s;
+}
+.toast.on{opacity:1}
+@media(prefers-reduced-motion:reduce){*{transition:none !important; animation:none !important}}
+</style>
+</head>
+<body>
+
+<!-- ═══════ 로그인 ═══════ -->
+<div id="screen-login">
+  <div class="card-login">
+    <div class="holo-bar"></div>
+    <h1 id="login-title">로그인</h1>
+    <p class="sub" id="login-sub">관리자 계정으로 로그인하세요.</p>
+    <div class="row"><label class="lbl">아이디</label><input id="li-id" class="fld" autocomplete="username"></div>
+    <div class="row"><label class="lbl">비밀번호</label><input id="li-pw" class="fld" type="password" autocomplete="current-password"></div>
+    <div class="row hidden" id="li-pw2row"><label class="lbl">비밀번호 확인</label><input id="li-pw2" class="fld" type="password"></div>
+    <div class="row hidden" id="li-spacerow"><label class="lbl">첫 드래프트 카테고리 이름</label><input id="li-space" class="fld" placeholder="예: 꼬마만두 드래프트"></div>
+    <div class="err" id="li-err"></div>
+    <button class="btn holo" id="li-btn" style="width:100%;padding:11px">로그인</button>
+  </div>
+</div>
+
+<!-- ═══════ 메인 ═══════ -->
+<div id="screen-app" class="hidden">
+  <div class="topbar hide-on-capture">
+    <span class="save" id="savestate"></span>
+    <span id="space-box" class="hidden" style="display:inline-flex;align-items:center;gap:7px;margin-right:4px">
+      <span class="lbl" style="margin:0">카테고리</span>
+      <select id="space-sel" class="fld" style="width:auto;padding:6px 11px;font-weight:700"></select>
+    </span>
+    <span id="space-tag" class="badge ok hidden" style="margin-right:4px"></span>
+    <a class="btn" href="../" style="text-decoration:none">MKG 대시보드</a>
+    <button class="btn" id="go-admin">관리자 페이지</button>
+    <button class="btn" id="go-pw">비밀번호 변경</button>
+    <button class="btn" id="go-out">로그아웃</button>
+  </div>
+
+  <div class="wrap">
+    <div class="toolrow hide-on-capture">
+      <button class="btn ghost" id="tg-settings">설정 접기 ▲</button>
+      <div class="right">
+        <button class="btn sky" id="tg-players">선수 입력</button>
+        <button class="btn" id="tg-memo">메모장</button>
+        <button class="btn rose" id="btn-resetall">전체 초기화</button>
+        <button class="btn mint" id="tg-capture">캡처 모드</button>
+      </div>
+    </div>
+
+    <div class="settings" id="settings">
+      <div><label class="lbl">룰</label>
+        <select id="s-rule" class="fld"><option>킬딜</option><option>킬</option><option>딜</option><option>순위</option></select></div>
+      <div><label class="lbl">모드</label>
+        <select id="s-mode" class="fld"><option>노말</option><option>경쟁</option><option>커스텀</option></select></div>
+      <div><label class="lbl">점수판 연결</label>
+        <select id="s-board" class="fld" title="드래프트 팀이 선택한 킬내기 점수판의 TEAM 탭으로 자동 입력됩니다"><option value="">없음</option><option>지옥연도</option><option>대꼴룰</option><option>빙고</option></select></div>
+      <div><label class="lbl">팀 수</label><input id="s-teams" class="fld" type="number" min="1" step="1" value="6"></div>
+      <div><label class="lbl">목표 총점(%)</label><div class="suffix"><input id="s-target" class="fld" type="number" value="100"><span>%</span></div></div>
+      <div><label class="lbl">티어 모드</label>
+        <select id="s-tier" class="fld"><option>1~4</option><option>1~3</option><option>1~2</option><option>제한 없음</option></select></div>
+    </div>
+
+    <div class="linebar hide-on-capture">
+      <div class="grp">
+        <button class="btn" id="b-copy">⧉ 팀장 복사</button>
+        <button class="btn" data-clear="0">팀장라인 삭제</button>
+        <button class="btn" data-clear="1">2번라인 삭제</button>
+        <button class="btn" data-clear="2">3번라인 삭제</button>
+        <button class="btn" data-clear="3">4번라인 삭제</button>
+        <button class="btn rose" id="b-rerollall">전체 리롤</button>
+      </div>
+      <div class="grp"><button class="btn holo" id="b-shuffle-cap">⤨ 팀장 셔플</button></div>
+    </div>
+
+    <div class="teams" id="teams"></div>
+
+    <div class="board">
+      <div class="board-head">
+        <h4>들어가기 순서</h4>
+        <button class="btn holo hide-on-capture" id="b-shuffle-entry">⤨ 들어가기 셔플</button>
+      </div>
+      <div class="entry-strip" id="entry"></div>
+      <div class="stats" id="stats"></div>
+      <div id="lines"></div>
+      <div class="newline hide-on-capture">
+        <span class="lb">+ 새 포인트 라인 추가</span>
+        <input class="fld" id="nl-score" type="number" placeholder="점수" style="width:96px">
+        <input class="fld" id="nl-death" type="number" placeholder="데스" style="width:96px">
+        <button class="btn sm" id="nl-add">추가</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════ 관리자 ═══════ -->
+<div id="screen-admin" class="hidden">
+  <div class="topbar"><button class="btn" id="ad-back">← 드래프트로 돌아가기</button></div>
+  <div class="admin">
+    <h2>관리자 페이지</h2>
+    <p style="color:var(--ink2);font-size:12.5px;margin:4px 0 0">계정, 선수 티어, 포인트 라인을 관리합니다.</p>
+
+    <div class="sec" id="sec-cats"><div class="holo-bar"></div><div class="inner">
+      <h3>드래프트 카테고리 관리</h3>
+      <p style="margin:-6px 0 12px;font-size:12px;color:var(--ink2);line-height:1.6">
+        카테고리는 하나의 독립된 드래프트입니다. 선수 명단·포인트 라인·팀 배치가 카테고리마다 따로 저장되고,
+        관리자 계정은 배정받은 카테고리 하나만 볼 수 있습니다.</p>
+      <div class="tbl-wrap"><table><thead><tr><th style="width:34%">카테고리</th><th style="width:38%">배정된 계정</th><th></th></tr></thead><tbody id="ad-cats"></tbody></table></div>
+      <div class="inline-form">
+        <div class="f"><label class="lbl">새 카테고리 이름</label><input id="ac-name" class="fld" placeholder="예: 꼬마만두 드래프트"></div>
+        <button class="btn holo" id="ac-add">카테고리 추가</button>
+      </div>
+      <div class="err" id="ac-err"></div>
+    </div></div>
+
+    <div class="sec" id="sec-accounts"><div class="holo-bar"></div><div class="inner">
+      <h3>계정 관리</h3>
+      <p style="margin:-6px 0 12px;font-size:12px;color:var(--ink2);line-height:1.6">
+        계정을 추가할 때 <b>담당 카테고리</b>를 지정합니다. 그 계정은 로그인 후 해당 카테고리의 선수 관리만 할 수 있습니다.
+        같은 카테고리에 여러 계정을 배정하면 세팅을 함께 씁니다.</p>
+      <div class="tbl-wrap"><table><thead><tr><th style="width:30%">아이디</th><th style="width:30%">담당 카테고리</th><th style="width:22%">권한</th><th style="width:18%"></th></tr></thead><tbody id="ad-users"></tbody></table></div>
+      <div class="inline-form">
+        <div class="f"><label class="lbl">아이디</label><input id="au-id" class="fld" placeholder="예: 꼬마만두"></div>
+        <div class="f"><label class="lbl">비밀번호</label><input id="au-pw" class="fld" type="text"></div>
+        <div class="f"><label class="lbl">담당 카테고리</label><select id="au-space" class="fld"></select></div>
+        <button class="btn holo" id="au-add">계정 추가</button>
+      </div>
+      <div class="err" id="au-err"></div>
+    </div></div>
+
+    <div class="sec"><div class="holo-bar"></div><div class="inner">
+      <h3>선수 티어 관리 <span id="ap-scope" class="badge ok" style="margin-left:6px"></span></h3>
+      <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-bottom:11px">
+        <input id="ap-search" class="fld" placeholder="이름으로 검색" style="max-width:240px">
+        <label id="ap-all-box" class="hidden" style="align-items:center;gap:6px;font-size:12.5px;font-weight:600;color:var(--ink2);cursor:pointer">
+          <input type="checkbox" id="ap-all" style="accent-color:#a78de0"> 모든 카테고리 통합 보기
+        </label>
+      </div>
+      <div class="tbl-wrap"><table><thead><tr><th style="width:32%">이름</th><th id="th-space" class="hidden" style="width:18%">카테고리</th><th style="width:20%">티어 점수</th><th style="width:22%">상태</th><th></th></tr></thead><tbody id="ad-players"></tbody></table></div>
+      <div class="inline-form">
+        <div class="f"><label class="lbl">이름</label><input id="ap-name" class="fld" placeholder="예: 꼬마만두"></div>
+        <div class="f" style="max-width:140px"><label class="lbl">티어 점수</label><input id="ap-score" class="fld" type="number" placeholder="비우면 미확인"></div>
+        <button class="btn holo" id="ap-add">선수 추가</button>
+      </div>
+      <div style="margin-top:18px">
+        <label class="lbl">일괄 등록 — 한 줄에 <b style="color:#8574c4">이름,점수</b> (점수를 비우면 티어 미확인)</label>
+        <textarea id="ap-bulk" class="ta" rows="5" placeholder="꼬마만두,160&#10;꼬마만두2,145&#10;꼬마만두3"></textarea>
+        <button class="btn" id="ap-bulkadd" style="margin-top:9px">일괄 등록</button>
+      </div>
+    </div></div>
+
+    <div class="sec" id="sec-lines"><div class="holo-bar"></div><div class="inner">
+      <h3>포인트 라인 관리</h3>
+      <div class="tbl-wrap"><table><thead><tr><th style="width:35%">점수</th><th style="width:35%">데스</th><th></th></tr></thead><tbody id="ad-lines"></tbody></table></div>
+      <div class="inline-form">
+        <div class="f" style="max-width:140px"><label class="lbl">점수</label><input id="al-score" class="fld" type="number"></div>
+        <div class="f" style="max-width:140px"><label class="lbl">데스</label><input id="al-death" class="fld" type="number" value="-12"></div>
+        <button class="btn holo" id="al-add">라인 추가</button>
+      </div>
+    </div></div>
+  </div>
+</div>
+
+<!-- ═══════ 선수 입력 ═══════ -->
+<div class="float hidden" id="pnl-players" style="left:58%; top:118px; width:610px; height:530px">
+  <div class="float-head" data-drag="pnl-players">
+    <span class="grip">⋮⋮</span><span class="ttl">선수 입력</span>
+    <span class="cnt" id="pl-count">총 0명</span><span class="sp"></span>
+    <span class="slider">투명도 <input type="range" id="pl-opa" min="45" max="100" value="100" style="width:80px"></span>
+    <button class="btn sm" id="pl-close">닫기</button>
+  </div>
+  <div class="float-body">
+    <textarea id="pl-input" class="ta" rows="7" placeholder="선수 이름을 붙여넣고 Enter (줄바꿈·쉼표·탭 구분 모두 인식)&#10;&#10;예)&#10;꼬마만두&#10;꼬마만두2&#10;꼬마만두3"></textarea>
+    <div style="display:flex;gap:8px;margin-top:9px">
+      <button class="btn holo sm" id="pl-apply">명단 등록</button>
+      <button class="btn rose sm" id="pl-clear">명단 비우기</button>
+    </div>
+    <div class="tiergrid">
+      <div class="tierbox"><div class="h"><span>티어 미확인</span><b id="pl-nc">0명</b></div><div class="chips" id="pl-unconf"></div></div>
+      <div class="tierbox"><div class="h"><span>티어 확인됨</span><b id="pl-cc">0명</b></div><div class="chips" id="pl-conf"></div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════ 메모장 ═══════ -->
+<div class="float hidden" id="pnl-memo" style="left:42%; top:180px; width:570px; height:450px">
+  <div class="float-head" data-drag="pnl-memo">
+    <span class="grip">⋮⋮</span><span class="ttl">메모장</span><span class="sp"></span>
+    <span class="slider">글씨 <input type="range" id="mm-size" min="12" max="34" value="21" style="width:90px"><b id="mm-num">21</b></span>
+    <button class="btn sm" id="mm-close">닫기</button>
+  </div>
+  <div class="float-body"><textarea id="mm-text" class="ta" style="height:100%;font-size:21px"></textarea></div>
+</div>
+
+<!-- ═══════ 비밀번호 변경 ═══════ -->
+<div class="float hidden" id="pnl-pw" style="left:50%; top:22%; width:340px">
+  <div class="float-head" data-drag="pnl-pw"><span class="grip">⋮⋮</span><span class="ttl">비밀번호 변경</span><span class="sp"></span><button class="btn sm" id="pw-close">닫기</button></div>
+  <div class="float-body">
+    <label class="lbl">현재 비밀번호</label><input id="pw-old" class="fld" type="password" style="margin-bottom:11px">
+    <label class="lbl">새 비밀번호</label><input id="pw-new" class="fld" type="password" style="margin-bottom:11px">
+    <label class="lbl">새 비밀번호 확인</label><input id="pw-new2" class="fld" type="password">
+    <div class="err" id="pw-err"></div>
+    <button class="btn holo" id="pw-save" style="width:100%">변경 저장</button>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ╔══════════════════════════════════════════════╗
+   ║  BACKEND ADAPTER — 이 블록만 갈아끼우면      ║
+   ║  로컬 / 구글 시트 버전이 됩니다.             ║
+   ╚══════════════════════════════════════════════╝ */
+/* ADAPTER:START */
+/* 구글 시트 버전 — Apps Script 웹앱(JSON API)과 통신합니다 */
+const PD_API='https://script.google.com/macros/s/AKfycbxSRB5fZ5SPXPzEIBrE7l2lleF-UaZdHQK3-SIRhM3gW-VdCHGFCZOTGYqUMcR0gaEdsg/exec';
+const API=(()=>{
+  let TOKEN=null;
+  const call=async(fn,...args)=>{
+    const r=await fetch(PD_API,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({fn,args})});
+    const j=await r.json();
+    if(!j.ok) throw new Error(j.error||'서버 오류');
+    return j.data;
+  };
+  const P=s=>{ if(s==null||s==='') return null; if(typeof s!=='string') return s; try{return JSON.parse(s);}catch(e){return null;} };
+  const withTok=async(fn,...a)=>{ try{ return await call(fn,TOKEN,...a); }catch(e){ return {ok:false,msg:e.message}; } };
+  return {
+    label:'구글 시트', saveDelay:1200,
+    async init(){ return await call('gasInit'); },
+    async createFirstAdmin(id,pw,cat){ try{ const r=await call('gasCreateFirstAdmin',id,pw,cat); if(r&&r.ok) TOKEN=r.token; return r; }catch(e){ return {ok:false,msg:e.message}; } },
+    async login(id,pw){ try{ const r=await call('gasLogin',id,pw); if(r&&r.ok) TOKEN=r.token; return r; }catch(e){ return {ok:false,msg:e.message}; } },
+    async logout(){ TOKEN=null; },
+    changePw(o,n){ return withTok('gasChangePw',o,n); },
+    async users(){ return await call('gasUsers',TOKEN); },
+    async categories(){ return await call('gasCategories',TOKEN); },
+    addCategory(n){ return withTok('gasAddCategory',n); },
+    renameCategory(o,n){ return withTok('gasRenameCategory',o,n); },
+    delCategory(n){ return withTok('gasDelCategory',n); },
+    addUser(id,pw,sp){ return withTok('gasAddUser',id,pw,sp); },
+    delUser(id){ return withTok('gasDelUser',id); },
+    async load(sp){ const r=await call('gasLoad',TOKEN,sp); return { db:P(r&&r.db), draft:P(r&&r.draft) }; },
+    async save(sp,db,draft){ const r=await call('gasSave',TOKEN,sp,JSON.stringify(db),JSON.stringify(draft)); if(r&&r.ok===false) throw new Error(r.msg); },
+    async saveDb(sp,db){ const r=await call('gasSaveDb',TOKEN,sp,JSON.stringify(db)); if(r&&r.ok===false) throw new Error(r.msg); }
+  };
+})();
+/* ADAPTER:END */
+
+/* ══════════════ 상태 ══════════════ */
+let DB={players:[],lines:[]}, D=null, ME=null, SPACE=null, MERGED=null;
+const DEFAULT_LINES=[
+  {score:160,death:-12},{score:145,death:-12},{score:130,death:-12},{score:120,death:-12},
+  {score:100,death:-7},{score:90,death:-7},{score:80,death:-7},{score:70,death:-6},{score:60,death:-6}
+];
+function newDraft(){return{settings:{rule:'킬딜',mode:'노말',teams:6,target:100,tier:'1~4'},roster:[],teams:Array.from({length:6},()=>['','','','']),entry:[],memo:'',memoSize:21,panels:{}};}
+const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
+const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+function toast(m){const t=$('#toast');t.textContent=m;t.classList.add('on');clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove('on'),1800);}
+let saveT;
+function save(){
+  clearTimeout(saveT);
+  $('#savestate').textContent='저장 중…';
+  saveT=setTimeout(async()=>{
+    try{ await API.save(SPACE,DB,D); $('#savestate').textContent='저장됨 · '+SPACE+' · '+API.label; }
+    catch(e){ $('#savestate').textContent='저장 실패 — 새로고침 후 다시 시도'; }
+  },API.saveDelay);
+}
+
+/* ══════════════ 부팅 ══════════════ */
+(async function boot(){
+  const st=await API.init();
+  if(!st.hasUsers){
+    $('#login-title').textContent='최초 관리자 등록';
+    $('#login-sub').textContent='첫 관리자 계정을 만들어 주세요. 이후 이 계정으로 다른 관리자를 추가할 수 있습니다.';
+    $('#li-pw2row').classList.remove('hidden');
+    $('#li-spacerow').classList.remove('hidden');
+    $('#li-btn').textContent='계정 만들고 시작하기';
+  }
+})();
+
+$('#li-btn').onclick=doLogin;
+['#li-id','#li-pw','#li-pw2'].forEach(s=>$(s).addEventListener('keydown',e=>{if(e.key==='Enter')doLogin();}));
+async function doLogin(){
+  const id=$('#li-id').value.trim(), pw=$('#li-pw').value, err=$('#li-err');
+  err.textContent=''; const btn=$('#li-btn'), t0=btn.textContent; btn.textContent='확인 중…'; btn.disabled=true;
+  try{
+    const setup=!$('#li-pw2row').classList.contains('hidden');
+    let r;
+    if(setup){
+      if(!id||!pw){err.textContent='아이디와 비밀번호를 모두 입력하세요.';return;}
+      if(pw!==$('#li-pw2').value){err.textContent='비밀번호가 서로 다릅니다.';return;}
+      r=await API.createFirstAdmin(id,pw,$('#li-space').value.trim());
+    }else{
+      r=await API.login(id,pw);
+    }
+    if(!r.ok){err.textContent=r.msg||'로그인에 실패했습니다.';return;}
+    ME=r.user; await enterApp();
+  }catch(e){ err.textContent='서버에 연결하지 못했습니다. 잠시 후 다시 시도하세요.'; }
+  finally{ btn.textContent=t0; btn.disabled=false; }
+}
+async function enterApp(){
+  SPACE=ME.space||ME.id;
+  await loadSpace(SPACE);
+  $('#screen-login').classList.add('hidden');
+  $('#screen-app').classList.remove('hidden');
+  await setupSpaces();
+}
+async function loadSpace(sp){
+  const data=await API.load(sp);
+  DB=data.db||{players:[],lines:JSON.parse(JSON.stringify(DEFAULT_LINES))};
+  if(!DB.lines||!DB.lines.length)DB.lines=JSON.parse(JSON.stringify(DEFAULT_LINES));
+  if(!DB.players)DB.players=[];
+  D=data.draft||newDraft();
+  MERGED=null;
+  $('#savestate').textContent='저장됨 · '+sp+' · '+API.label;
+  hydrate(); renderAll();
+}
+async function setupSpaces(){
+  const isSuper=ME.role==='super';
+  // 카테고리·계정 관리는 최초 관리자 전용, 나머지 관리자 페이지는 모두 사용
+  $('#sec-cats').classList.toggle('hidden',!isSuper);
+  $('#sec-accounts').classList.toggle('hidden',!isSuper);
+  $('#sec-lines').classList.remove('hidden');
+  $('#ap-all-box').classList.toggle('hidden',!isSuper);
+  if(!isSuper&&$('#ap-all').checked){ $('#ap-all').checked=false; MERGED=null; }
+  if(!isSuper){
+    $('#space-box').classList.add('hidden');
+    $('#space-tag').classList.remove('hidden');
+    $('#space-tag').textContent=SPACE;
+    return;
+  }
+  $('#space-tag').classList.add('hidden');
+  $('#space-box').classList.remove('hidden');
+  const cats=(await API.categories()).map(c=>c.name);
+  if(!cats.includes(SPACE))cats.unshift(SPACE);
+  const sel=$('#space-sel'); sel.innerHTML='';
+  cats.forEach(s=>{const o=document.createElement('option');o.value=s;o.textContent=s;sel.appendChild(o);});
+  sel.value=SPACE;
+  sel.onchange=async()=>{ await switchSpace(sel.value); };
+}
+async function switchSpace(sp){
+  clearTimeout(saveT); await API.save(SPACE,DB,D);
+  SPACE=sp; await loadSpace(SPACE);
+  const sel=$('#space-sel'); if(sel) sel.value=sp;
+  toast(sp+' 카테고리로 전환했습니다.');
+}
+$('#go-out').onclick=async()=>{
+  try{ clearTimeout(saveT); if(D&&SPACE) await API.save(SPACE,DB,D); }catch(e){}
+  try{ await API.logout(); }catch(e){}
+  ME=null; SPACE=null; MERGED=null; D=null; DB={players:[],lines:[]};
+  document.body.classList.remove('capture');
+  ['pnl-players','pnl-memo','pnl-pw'].forEach(id=>$('#'+id).classList.add('hidden'));
+  $('#screen-admin').classList.add('hidden');
+  $('#screen-app').classList.add('hidden');
+  $('#space-box').classList.add('hidden');
+  $('#space-tag').classList.add('hidden');
+  $('#savestate').textContent='';
+  $('#teams').innerHTML=''; $('#lines').innerHTML=''; $('#entry').innerHTML=''; $('#stats').innerHTML='';
+  $('#pl-input').value=''; $('#mm-text').value='';
+  $('#li-id').value=''; $('#li-pw').value=''; $('#li-pw2').value=''; $('#li-space').value='';
+  $('#li-err').textContent='';
+  $('#li-pw2row').classList.add('hidden'); $('#li-spacerow').classList.add('hidden');
+  $('#login-title').textContent='로그인';
+  $('#login-sub').textContent='관리자 계정으로 로그인하세요.';
+  $('#li-btn').textContent='로그인';
+  $('#screen-login').classList.remove('hidden');
+  $('#li-id').focus();
+  toast('로그아웃되었습니다.');
+};
+
+/* ══════════════ 설정 ══════════════ */
+function hydrate(){
+  $('#s-rule').value=D.settings.rule; $('#s-mode').value=D.settings.mode; $('#s-board').value=D.settings.board||'';
+  $('#s-teams').value=D.settings.teams; $('#s-target').value=D.settings.target; $('#s-tier').value=D.settings.tier;
+  $('#mm-text').value=D.memo||''; $('#mm-size').value=D.memoSize||21;
+  $('#mm-num').textContent=D.memoSize||21; $('#mm-text').style.fontSize=(D.memoSize||21)+'px';
+  for(const [id,p] of Object.entries(D.panels||{})){const el=$('#'+id); if(el&&p){el.style.left=p.l;el.style.top=p.t;}}
+}
+$('#s-rule').onchange=e=>{D.settings.rule=e.target.value;save();};
+$('#s-mode').onchange=e=>{D.settings.mode=e.target.value;save();}; $('#s-board').onchange=e=>{D.settings.board=e.target.value;save();toast(e.target.value?e.target.value+' 점수판으로 팀이 자동 입력됩니다.':'점수판 연결을 해제했습니다.');};
+$('#s-target').onchange=e=>{D.settings.target=+e.target.value;save();};
+$('#s-tier').onchange=e=>{D.settings.tier=e.target.value;save();};
+$('#s-teams').onchange=e=>{
+  let n=Math.floor(+e.target.value)||6;
+  if(n<1)n=1;                                   // 상한은 두지 않습니다
+  if(n>100&&!confirm(n+'개 팀을 만들면 화면이 많이 느려질 수 있습니다. 계속할까요?')){
+    e.target.value=D.settings.teams; return;
+  }
+  e.target.value=n; D.settings.teams=n;
+  const cut=D.teams.slice(n).flat().filter(Boolean);   // 줄일 때 잘려나가는 선수는 명단으로 복귀
+  while(D.teams.length<n)D.teams.push(['','','','']);
+  D.teams=D.teams.slice(0,n);
+  renderAll(); save();
+  if(cut.length)toast(`${cut.length}명이 명단으로 돌아갔습니다.`);
+};
+$('#tg-settings').onclick=e=>{const off=$('#settings').classList.toggle('hidden');e.target.textContent=off?'설정 펼치기 ▼':'설정 접기 ▲';};
+function setCapture(on){
+  document.body.classList.toggle('capture',on);
+  if(on){ if(document.activeElement&&document.activeElement.blur)document.activeElement.blur();
+          toast('캡처 모드 · ESC를 누르면 돌아옵니다'); }
+  else toast('캡처 모드를 껐습니다.');
+}
+$('#tg-capture').onclick=()=>setCapture(true);
+// 입력칸에 포커스가 있어도 ESC가 먼저 잡히도록 캡처 단계에서 처리
+document.addEventListener('keydown',e=>{
+  if(e.key!=='Escape'||!document.body.classList.contains('capture'))return;
+  e.preventDefault(); e.stopPropagation(); setCapture(false);
+},true);
+$('#btn-resetall').onclick=()=>{
+  if(!confirm('명단·팀 배치·들어가기 순서를 모두 초기화할까요? (메모는 유지됩니다)'))return;
+  const memo=D.memo,ms=D.memoSize,st=D.settings,pn=D.panels;
+  D=newDraft(); D.memo=memo; D.memoSize=ms; D.settings=st; D.panels=pn;
+  D.teams=Array.from({length:st.teams},()=>['','','','']);
+  renderAll(); save(); toast('전체 초기화 완료');
+};
+
+/* ══════════════ 헬퍼 ══════════════ */
+const lineOf=s=>DB.lines.find(l=>l.score===s);
+function ensureLine(s){ if(!lineOf(s)){DB.lines.push({score:s,death:0});DB.lines.sort((a,b)=>b.score-a.score);} }
+function assignedMap(){const m={};D.teams.forEach((t,ti)=>t.forEach((n,si)=>{if(n)m[n]={ti,si};}));return m;}
+function playerScore(n){const p=D.roster.find(p=>p.name===n);return p&&p.score!=null?p.score:0;}
+const teamScore=ti=>D.teams[ti].reduce((s,n)=>s+(n?playerScore(n):0),0);
+function unassigned(){const a=assignedMap();return D.roster.filter(p=>!(p.name in a));}
+
+/* ══════════════ 팀 ══════════════ */
+function renderTeams(){
+  const n=D.settings.teams, box=$('#teams');
+  const cols=Math.max(1,Math.min(n,Math.floor((box.clientWidth||1600)/300)||6));
+  box.style.gridTemplateColumns=`repeat(${cols},minmax(0,1fr))`;
+  box.innerHTML='';
+  for(let t=0;t<n;t++){
+    const card=document.createElement('div'); card.className='team';
+    card.innerHTML='<div class="holo-bar"></div>';
+    const inner=document.createElement('div'); inner.className='inner';
+    inner.innerHTML=`<h3><span>${t+1}팀</span><em>${teamScore(t)}점</em></h3>`;
+    for(let s=0;s<4;s++){
+      const wrap=document.createElement('div'); wrap.className='slot-wrap';
+      const inp=document.createElement('input');
+      inp.className='slot'+(D.teams[t][s]?(s===0?' captain':' filled'):'');
+      inp.placeholder='이름 입력'; inp.value=D.teams[t][s]||'';
+      inp.dataset.t=t; inp.dataset.s=s;
+      wrap.appendChild(inp);
+      if(D.teams[t][s]){const p=document.createElement('span');p.className='pin';p.textContent='☆';wrap.appendChild(p);}
+      bindSlot(inp,wrap); inner.appendChild(wrap);
+    }
+    card.appendChild(inner); box.appendChild(card);
+  }
+}
+function bindSlot(inp,wrap){
+  const t=+inp.dataset.t, s=+inp.dataset.s;
+  let ac=null, idx=-1;
+  const close=()=>{if(ac){ac.remove();ac=null;idx=-1;}};
+  const open=()=>{
+    close();
+    const q=inp.value.trim(), amap=assignedMap();
+    let list=D.roster.filter(p=>!(p.name in amap));
+    if(q)list=list.filter(p=>p.name.toLowerCase().includes(q.toLowerCase()));
+    list=list.sort((a,b)=>(b.score??-1)-(a.score??-1)).slice(0,40);
+    if(!list.length)return;
+    ac=document.createElement('div'); ac.className='ac';
+    list.forEach(p=>{
+      const d=document.createElement('div');
+      d.innerHTML=`<span>${p.name}</span><b>${p.score!=null?p.score+'점':'미확인'}</b>`;
+      d.onmousedown=e=>{e.preventDefault();pick(p.name);};
+      ac.appendChild(d);
+    });
+    wrap.appendChild(ac);
+  };
+  const pick=name=>{
+    if(name in assignedMap()){toast('이미 배정된 선수입니다.');return;}
+    D.teams[t][s]=name; close(); D.entry=D.entry.filter(x=>x!==name); renderAll(); save();
+  };
+  inp.addEventListener('focus',open);
+  inp.addEventListener('input',open);
+  inp.addEventListener('blur',()=>setTimeout(()=>{close();inp.value=D.teams[t][s]||'';},120));
+  inp.addEventListener('keydown',e=>{
+    const items=ac?[...ac.children]:[];
+    if(e.key==='ArrowDown'&&items.length){e.preventDefault();idx=Math.min(idx+1,items.length-1);items.forEach((x,i)=>x.classList.toggle('on',i===idx));items[idx].scrollIntoView({block:'nearest'});}
+    else if(e.key==='ArrowUp'&&items.length){e.preventDefault();idx=Math.max(idx-1,0);items.forEach((x,i)=>x.classList.toggle('on',i===idx));}
+    else if(e.key==='Enter'){e.preventDefault();if(items.length)items[idx>=0?idx:0].dispatchEvent(new MouseEvent('mousedown'));}
+    else if(e.key==='Escape')close();
+    else if((e.key==='Backspace'||e.key==='Delete')&&!inp.value){D.teams[t][s]='';renderAll();save();}
+  });
+  inp.addEventListener('dblclick',()=>{if(D.teams[t][s]){D.teams[t][s]='';renderAll();save();}});
+  inp.addEventListener('dragover',e=>{e.preventDefault();inp.classList.add('dropping');});
+  inp.addEventListener('dragleave',()=>inp.classList.remove('dropping'));
+  inp.addEventListener('drop',e=>{
+    e.preventDefault(); inp.classList.remove('dropping');
+    const name=e.dataTransfer.getData('text/plain'); if(!name)return;
+    const amap=assignedMap();
+    if(name in amap){const o=amap[name];D.teams[o.ti][o.si]='';}
+    D.teams[t][s]=name; D.entry=D.entry.filter(x=>x!==name);
+    renderAll(); save();
+  });
+}
+
+/* ══════════════ 포인트 라인 ══════════════ */
+function renderLines(){
+  const amap=assignedMap(), box=$('#lines'); box.innerHTML='';
+  DB.lines.slice().sort((a,b)=>b.score-a.score).forEach(l=>{
+    const row=document.createElement('div'); row.className='pline';
+    row.innerHTML=`<div class="score">${l.score} <i>(${l.death})</i></div>`;
+    const nm=document.createElement('div'); nm.className='names';
+    D.roster.filter(p=>p.score===l.score).forEach(p=>{
+      const c=document.createElement('span');
+      c.className='pchip'+(p.name in amap?' taken':'');
+      c.appendChild(document.createTextNode(p.name));
+      if(!(p.name in amap)){c.draggable=true;c.addEventListener('dragstart',e=>e.dataTransfer.setData('text/plain',p.name));}
+      const x=document.createElement('span'); x.className='x hide-on-capture'; x.textContent='×'; x.title='이 라인에서 제외';
+      x.onclick=()=>{p.score=null;p.confirmed=false;renderAll();save();};
+      c.appendChild(x); nm.appendChild(c);
+    });
+    const aw=document.createElement('div'); aw.className='addwrap hide-on-capture';
+    const ai=document.createElement('input'); ai.className='add-in'; ai.placeholder='선수 추가';
+    aw.appendChild(ai); nm.appendChild(aw); bindAdd(ai,aw,l.score);
+    row.appendChild(nm);
+    const del=document.createElement('button'); del.className='btn sm ghost hide-on-capture'; del.textContent='라인 삭제';
+    del.onclick=()=>{
+      if(!confirm(l.score+'점 라인을 삭제할까요? 선수는 미확인으로 돌아갑니다.'))return;
+      D.roster.forEach(p=>{if(p.score===l.score){p.score=null;p.confirmed=false;}});
+      DB.lines=DB.lines.filter(x=>x.score!==l.score); renderAll(); save();
+    };
+    row.appendChild(del); box.appendChild(row);
+  });
+}
+function bindAdd(inp,wrap,score){
+  let ac=null;
+  const close=()=>{if(ac){ac.remove();ac=null;}};
+  const open=()=>{
+    close();
+    const q=inp.value.trim();
+    let list=D.roster.filter(p=>p.score==null);
+    if(q)list=list.filter(p=>p.name.toLowerCase().includes(q.toLowerCase()));
+    if(!list.length)return;
+    ac=document.createElement('div'); ac.className='ac'; ac.style.minWidth='168px';
+    list.slice(0,30).forEach(p=>{
+      const d=document.createElement('div'); d.innerHTML=`<span>${p.name}</span><b>미확인</b>`;
+      d.onmousedown=e=>{e.preventDefault();p.score=score;renderAll();save();toast(`${p.name} → ${score}점 라인`);};
+      ac.appendChild(d);
+    });
+    wrap.appendChild(ac);
+  };
+  inp.addEventListener('focus',open);
+  inp.addEventListener('input',open);
+  inp.addEventListener('blur',()=>setTimeout(()=>{close();inp.value='';},130));
+  inp.addEventListener('keydown',e=>{
+    if(e.key==='Enter'){
+      e.preventDefault(); const q=inp.value.trim(); if(!q)return;
+      let p=D.roster.find(p=>p.name===q);
+      if(!p){p={name:q,score:null,confirmed:false};D.roster.push(p);}
+      p.score=score; inp.value=''; close(); renderAll(); save();
+    }
+    if(e.key==='Escape')close();
+  });
+}
+$('#nl-add').onclick=()=>{
+  const s=+$('#nl-score').value, d=+$('#nl-death').value||0;
+  if(!s){toast('점수를 입력하세요.');return;}
+  if(lineOf(s)){toast('이미 있는 점수 라인입니다.');return;}
+  DB.lines.push({score:s,death:d}); DB.lines.sort((a,b)=>b.score-a.score);
+  $('#nl-score').value=''; $('#nl-death').value=''; renderLines(); save();
+};
+
+/* ══════════════ 통계 · 들어가기 ══════════════ */
+function renderStats(){
+  const a=assignedMap(), tot=D.roster.length, pick=Object.keys(a).length;
+  $('#stats').innerHTML=`<span class="stat">총원 ${tot}명</span><span class="stat a">뽑힌 인원 ${pick}명</span><span class="stat b">안 뽑힌 인원 ${tot-pick}명</span>`;
+}
+function renderEntry(){
+  const strip=$('#entry'); strip.innerHTML='';
+  const a=assignedMap();
+  D.entry=D.entry.filter(n=>!(n in a)&&D.roster.some(p=>p.name===n));
+  D.entry.forEach((n,i)=>{
+    const c=document.createElement('div'); c.className='echip'; c.draggable=true;
+    c.innerHTML=`<span class="no">${i+1}</span>${n}`;
+    c.addEventListener('dragstart',e=>{e.dataTransfer.setData('text/plain',n);c.classList.add('drag');});
+    c.addEventListener('dragend',()=>c.classList.remove('drag'));
+    strip.appendChild(c);
+  });
+}
+$('#b-shuffle-entry').onclick=async()=>{
+  const rest=unassigned().map(p=>p.name);
+  if(!rest.length){toast('남아 있는 선수가 없습니다.');return;}
+  D.entry=rest.slice(); renderEntry(); await sleep(450);
+  const sh=rest.slice();
+  for(let i=sh.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[sh[i],sh[j]]=[sh[j],sh[i]];}
+  D.entry=[]; renderEntry();
+  for(const n of sh){D.entry.push(n);renderEntry();await sleep(160);}
+  save();
+};
+
+/* ══════════════ 라인 조작 ══════════════ */
+$$('[data-clear]').forEach(b=>b.onclick=()=>{
+  const s=+b.dataset.clear; D.teams.forEach(t=>t[s]='');
+  renderAll(); save(); toast(`${s===0?'팀장':(s+1)+'번'}라인을 비웠습니다.`);
+});
+$('#b-rerollall').onclick=()=>{
+  if(!confirm('모든 라인을 비울까요?'))return;
+  D.teams=D.teams.map(()=>['','','','']); renderAll(); save(); toast('전체 리롤 완료');
+};
+$('#b-copy').onclick=async()=>{
+  const txt=D.teams.map((t,i)=>`${i+1}팀 ${t[0]||''}`).join('\n');
+  try{await navigator.clipboard.writeText(txt);toast('팀장 명단을 복사했습니다.');}
+  catch(e){prompt('아래 내용을 복사하세요',txt);}
+};
+$('#b-shuffle-cap').onclick=async()=>{
+  const caps=D.teams.map(t=>t[0]).filter(Boolean);
+  if(caps.length<2){toast('팀장 라인에 2명 이상 입력하세요.');return;}
+  for(let i=caps.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[caps[i],caps[j]]=[caps[j],caps[i]];}
+  D.teams.forEach(t=>t[0]=''); renderAll(); await sleep(300);
+  for(let i=0;i<caps.length;i++){D.teams[i][0]=caps[i];renderAll();await sleep(320);}
+  save();
+};
+
+/* ══════════════ 선수 입력 ══════════════ */
+const parseNames=raw=>raw.split(/[\n,\t]+|\s{2,}/).map(s=>s.trim()).filter(Boolean);
+function applyRoster(names){
+  names.forEach(n=>{
+    if(D.roster.some(p=>p.name===n))return;
+    const rec=DB.players.find(p=>p.name===n);
+    if(rec&&rec.confirmed&&rec.score!=null){ensureLine(rec.score);D.roster.push({name:n,score:rec.score,confirmed:true});}
+    else{D.roster.push({name:n,score:null,confirmed:false});if(!rec)DB.players.push({name:n,score:null,confirmed:false});}
+  });
+  renderAll(); save();
+}
+$('#pl-apply').onclick=()=>{
+  const names=parseNames($('#pl-input').value);
+  if(!names.length){toast('등록할 이름이 없습니다.');return;}
+  applyRoster(names); toast(`${names.length}명 처리 완료`);
+};
+$('#pl-input').addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();$('#pl-apply').click();}});
+$('#pl-clear').onclick=()=>{
+  if(!confirm('등록된 명단을 모두 비울까요?'))return;
+  D.roster=[]; D.entry=[]; D.teams=D.teams.map(()=>['','','','']);
+  $('#pl-input').value=''; renderAll(); save();
+};
+function renderRoster(){
+  const conf=D.roster.filter(p=>p.confirmed), unc=D.roster.filter(p=>!p.confirmed);
+  $('#pl-count').textContent=`총 ${D.roster.length}명`;
+  $('#pl-cc').textContent=conf.length+'명'; $('#pl-nc').textContent=unc.length+'명';
+  const fill=(el,arr,cls)=>{
+    el.innerHTML=arr.length?'':'<span class="empty">아직 없음</span>';
+    arr.forEach(p=>{const s=document.createElement('span');s.className='tchip'+cls;s.textContent=p.name+(p.score!=null?` · ${p.score}`:'');el.appendChild(s);});
+  };
+  fill($('#pl-conf'),conf,''); fill($('#pl-unconf'),unc,' no');
+}
+
+/* ══════════════ 메모 · 패널 ══════════════ */
+$('#mm-text').addEventListener('input',e=>{D.memo=e.target.value;save();});
+$('#mm-size').addEventListener('input',e=>{const v=+e.target.value;D.memoSize=v;$('#mm-num').textContent=v;$('#mm-text').style.fontSize=v+'px';save();});
+$('#pl-opa').addEventListener('input',e=>{$('#pnl-players').style.opacity=e.target.value/100;});
+const toggle=id=>$('#'+id).classList.toggle('hidden');
+$('#tg-players').onclick=()=>toggle('pnl-players');
+$('#tg-memo').onclick=()=>toggle('pnl-memo');
+$('#pl-close').onclick=()=>toggle('pnl-players');
+$('#mm-close').onclick=()=>toggle('pnl-memo');
+$('#go-pw').onclick=()=>{$('#pw-err').textContent='';$('#pnl-pw').classList.remove('hidden');};
+$('#pw-close').onclick=()=>$('#pnl-pw').classList.add('hidden');
+$('#pw-save').onclick=async()=>{
+  const e=$('#pw-err'); e.textContent='';
+  const nv=$('#pw-new').value;
+  if(nv.length<4){e.textContent='새 비밀번호는 4자 이상이어야 합니다.';return;}
+  if(nv!==$('#pw-new2').value){e.textContent='새 비밀번호가 서로 다릅니다.';return;}
+  const r=await API.changePw($('#pw-old').value,nv);
+  if(!r.ok){e.textContent=r.msg||'변경하지 못했습니다.';return;}
+  $('#pw-old').value=$('#pw-new').value=$('#pw-new2').value='';
+  $('#pnl-pw').classList.add('hidden'); toast('비밀번호를 변경했습니다.');
+};
+$$('[data-drag]').forEach(h=>{
+  h.addEventListener('mousedown',e=>{
+    if(e.target.closest('button,input'))return;
+    const el=$('#'+h.dataset.drag), r=el.getBoundingClientRect();
+    el.style.left=r.left+'px'; el.style.top=r.top+'px';
+    const ox=e.clientX-r.left, oy=e.clientY-r.top;
+    const mv=ev=>{
+      el.style.left=Math.max(0,Math.min(innerWidth-60,ev.clientX-ox))+'px';
+      el.style.top=Math.max(0,Math.min(innerHeight-40,ev.clientY-oy))+'px';
+    };
+    const up=()=>{
+      document.removeEventListener('mousemove',mv);document.removeEventListener('mouseup',up);
+      if(D){D.panels=D.panels||{};D.panels[el.id]={l:el.style.left,t:el.style.top};save();}
+    };
+    document.addEventListener('mousemove',mv);document.addEventListener('mouseup',up);
+    e.preventDefault();
+  });
+});
+
+/* ══════════════ 관리자 ══════════════ */
+$('#go-admin').onclick=()=>{$('#screen-app').classList.add('hidden');$('#screen-admin').classList.remove('hidden');renderAdmin();};
+$('#ad-back').onclick=()=>{$('#screen-admin').classList.add('hidden');$('#screen-app').classList.remove('hidden');renderAll();};
+
+async function renderAdmin(){
+  if(ME.role==='super'){
+    const cats=await API.categories();
+    // 카테고리 표
+    const ct=$('#ad-cats'); ct.innerHTML='';
+    cats.forEach(c=>{
+      const tr=document.createElement('tr');
+      const c1=document.createElement('td');
+      c1.innerHTML=`<b style="color:#7b6bb5">${c.name}</b>`+(c.name===SPACE?' <span class="badge ok" style="margin-left:4px">보는 중</span>':'');
+      const c2=document.createElement('td');
+      c2.innerHTML=c.users.length?c.users.join(', '):'<span style="color:var(--faint)">없음</span>';
+      const c3=document.createElement('td'); c3.style.whiteSpace='nowrap';
+      const bo=document.createElement('button'); bo.className='btn sm'; bo.textContent='열기';
+      bo.onclick=async()=>{ await switchSpace(c.name); renderAdmin(); };
+      const br=document.createElement('button'); br.className='btn sm'; br.textContent='이름 변경'; br.style.marginLeft='4px';
+      br.onclick=async()=>{
+        const n=prompt('새 카테고리 이름', c.name); if(!n||n===c.name)return;
+        const r=await API.renameCategory(c.name,n);
+        if(!r.ok){toast(r.msg);return;}
+        if(SPACE===c.name)SPACE=n;
+        if(ME.space===c.name)ME.space=n;
+        MERGED=null; await setupSpaces(); renderAdmin(); toast('이름을 바꿨습니다.');
+      };
+      const bd=document.createElement('button'); bd.className='btn sm rose'; bd.textContent='삭제'; bd.style.marginLeft='4px';
+      bd.onclick=async()=>{
+        if(!confirm(`'${c.name}' 카테고리를 삭제할까요?\n선수 명단·포인트 라인·팀 배치가 함께 지워집니다.`))return;
+        const r=await API.delCategory(c.name);
+        if(!r.ok){toast(r.msg);return;}
+        MERGED=null;
+        if(SPACE===c.name){ const left=(await API.categories())[0]; await switchSpace(left.name); }
+        await setupSpaces(); renderAdmin(); toast('카테고리를 삭제했습니다.');
+      };
+      c3.append(bo,br,bd);
+      tr.append(c1,c2,c3); ct.appendChild(tr);
+    });
+    // 계정 추가 폼의 카테고리 선택지
+    const asel=$('#au-space'); const keep=asel.value;
+    asel.innerHTML='';
+    cats.forEach(c=>{const o=document.createElement('option');o.value=c.name;o.textContent=c.name;asel.appendChild(o);});
+    if(keep&&cats.some(c=>c.name===keep))asel.value=keep;
+
+    const ut=$('#ad-users'); ut.innerHTML='<tr><td colspan="4" style="color:var(--faint)">불러오는 중…</td></tr>';
+    const users=await API.users();
+    ut.innerHTML='';
+    users.forEach(u=>{
+      const sp=u.space||u.id;
+      const tr=document.createElement('tr');
+      tr.innerHTML=`<td>${u.id}</td><td><b style="color:#7b6bb5">${sp}</b></td>`+
+                   `<td><span class="badge ${u.role==='super'?'ok':''}">${u.role==='super'?'최초 관리자':'관리자'}</span></td>`;
+      const td=document.createElement('td');
+      if(u.role!=='super'){
+        const b=document.createElement('button'); b.className='btn sm rose'; b.textContent='삭제';
+        b.onclick=async()=>{if(!confirm(u.id+' 계정을 삭제할까요? (카테고리의 선수 데이터는 남습니다)'))return;await API.delUser(u.id);renderAdmin();setupSpaces();};
+        td.appendChild(b);
+      }
+      tr.appendChild(td); ut.appendChild(tr);
+    });
+  }
+  await renderAdminPlayers(); renderAdminLines();
+}
+$('#ac-add').onclick=async()=>{
+  const e=$('#ac-err'); e.textContent='';
+  const r=await API.addCategory($('#ac-name').value);
+  if(!r.ok){e.textContent=r.msg||'추가하지 못했습니다.';return;}
+  $('#ac-name').value=''; MERGED=null; await setupSpaces(); renderAdmin(); toast('카테고리를 추가했습니다.');
+};
+function ensureLineIn(db,s){ if(!db.lines.find(l=>l.score===s)){db.lines.push({score:s,death:0});db.lines.sort((a,b)=>b.score-a.score);} }
+function persist(sp,db){ if(sp===SPACE)save(); else API.saveDb(sp,db); }
+
+async function loadMerged(){
+  const list=(await API.categories()).map(c=>c.name);
+  MERGED={};
+  for(const sp of list){
+    if(sp===SPACE){MERGED[sp]=DB;continue;}
+    try{ const d=await API.load(sp); MERGED[sp]=d.db||{players:[],lines:[]}; if(!MERGED[sp].players)MERGED[sp].players=[]; if(!MERGED[sp].lines)MERGED[sp].lines=[]; }
+    catch(e){ MERGED[sp]={players:[],lines:[]}; }
+  }
+}
+
+async function renderAdminPlayers(){
+  const all=ME.role==='super'&&$('#ap-all').checked;
+  $('#th-space').classList.toggle('hidden',!all);
+  $('#ap-scope').textContent=all?'모든 카테고리':SPACE;
+  const pt=$('#ad-players');
+  if(all&&!MERGED){ pt.innerHTML='<tr><td colspan="5" style="color:var(--faint)">모든 카테고리를 불러오는 중…</td></tr>'; await loadMerged(); }
+  const q=$('#ap-search').value.trim().toLowerCase();
+  const src=[];
+  if(all){ for(const [sp,db] of Object.entries(MERGED)) db.players.forEach(p=>src.push({sp,db,p})); }
+  else DB.players.forEach(p=>src.push({sp:SPACE,db:DB,p}));
+
+  pt.innerHTML='';
+  src.filter(x=>!q||x.p.name.toLowerCase().includes(q))
+     .sort((a,b)=>(a.sp===b.sp?0:(a.sp<b.sp?-1:1))||((b.p.score??-1)-(a.p.score??-1)))
+     .forEach(({sp,db,p})=>{
+    const tr=document.createElement('tr');
+    const c1=document.createElement('td'); c1.textContent=p.name;
+    const cs=document.createElement('td'); cs.className=all?'':'hidden';
+    cs.innerHTML=`<b style="color:#7b6bb5">${sp}</b>`;
+    const c2=document.createElement('td');
+    const si=document.createElement('input'); si.type='number'; si.value=p.score??''; si.placeholder='미확인';
+    si.onchange=()=>{
+      p.score=si.value===''?null:+si.value;
+      if(p.score!=null){p.confirmed=true;ensureLineIn(db,p.score);}
+      if(sp===SPACE)syncRoster();
+      renderAdminPlayers(); renderAdminLines(); persist(sp,db);
+    };
+    c2.appendChild(si);
+    const c3=document.createElement('td');
+    const bd=document.createElement('button'); bd.className='btn sm '+(p.confirmed?'mint':'');
+    bd.textContent=p.confirmed?'티어 확인됨':'티어 미확인';
+    bd.onclick=()=>{
+      if(!p.confirmed&&p.score==null){toast('티어 점수를 먼저 입력하세요.');return;}
+      p.confirmed=!p.confirmed;
+      if(sp===SPACE)syncRoster();
+      renderAdminPlayers(); persist(sp,db);
+    };
+    c3.appendChild(bd);
+    const c4=document.createElement('td');
+    const bx=document.createElement('button'); bx.className='btn sm rose'; bx.textContent='삭제';
+    bx.onclick=()=>{ db.players=db.players.filter(x=>x!==p); if(sp===SPACE)DB=db; renderAdminPlayers(); persist(sp,db); };
+    c4.appendChild(bx);
+    tr.append(c1,cs,c2,c3,c4); pt.appendChild(tr);
+  });
+  if(!pt.children.length) pt.innerHTML='<tr><td colspan="5" style="color:var(--faint)">등록된 선수가 없습니다.</td></tr>';
+}
+$('#ap-all').onchange=()=>{ MERGED=null; renderAdminPlayers(); };
+function renderAdminLines(){
+  const lt=$('#ad-lines'); lt.innerHTML='';
+  DB.lines.slice().sort((a,b)=>b.score-a.score).forEach(l=>{
+    const tr=document.createElement('tr');
+    const c1=document.createElement('td'); c1.textContent=l.score+'점';
+    const c2=document.createElement('td');
+    const di=document.createElement('input'); di.type='number'; di.value=l.death;
+    di.onchange=()=>{l.death=+di.value;save();};
+    c2.appendChild(di);
+    const c3=document.createElement('td');
+    const b=document.createElement('button'); b.className='btn sm rose'; b.textContent='삭제';
+    b.onclick=()=>{
+      if(!confirm(l.score+'점 라인 삭제?'))return;
+      DB.lines=DB.lines.filter(x=>x!==l);
+      D.roster.forEach(p=>{if(p.score===l.score){p.score=null;p.confirmed=false;}});
+      renderAdminLines(); save();
+    };
+    c3.appendChild(b); tr.append(c1,c2,c3); lt.appendChild(tr);
+  });
+}
+function syncRoster(){
+  D.roster.forEach(p=>{
+    const rec=DB.players.find(x=>x.name===p.name); if(!rec)return;
+    p.confirmed=!!rec.confirmed;
+    if(rec.confirmed&&rec.score!=null){ensureLine(rec.score);p.score=rec.score;}
+  });
+}
+$('#ap-search').oninput=renderAdminPlayers;
+$('#au-add').onclick=async()=>{
+  const id=$('#au-id').value.trim(), pw=$('#au-pw').value.trim(),
+        sp=$('#au-space').value.trim(), e=$('#au-err'); e.textContent='';
+  if(!id||!pw){e.textContent='아이디와 비밀번호를 모두 입력하세요.';return;}
+  if(!sp){e.textContent='담당 카테고리를 먼저 만들어 주세요.';return;}
+  const r=await API.addUser(id,pw,sp);
+  if(!r.ok){e.textContent=r.msg||'추가하지 못했습니다.';return;}
+  $('#au-id').value=$('#au-pw').value='';
+  MERGED=null; renderAdmin(); setupSpaces(); toast(`계정을 추가했습니다 (카테고리: ${sp})`);
+};
+$('#ap-add').onclick=()=>{
+  const n=$('#ap-name').value.trim(); if(!n)return;
+  const sv=$('#ap-score').value;
+  let p=DB.players.find(x=>x.name===n);
+  if(!p){p={name:n,score:null,confirmed:false};DB.players.push(p);}
+  p.score=sv===''?null:+sv; p.confirmed=p.score!=null;
+  if(p.score!=null)ensureLine(p.score);
+  $('#ap-name').value=$('#ap-score').value='';
+  syncRoster(); renderAdminPlayers(); renderAdminLines(); save();
+};
+$('#ap-bulkadd').onclick=()=>{
+  const rows=$('#ap-bulk').value.split('\n').map(r=>r.trim()).filter(Boolean); let n=0;
+  rows.forEach(r=>{
+    const [name,sc]=r.split(/[,\t]/).map(s=>(s||'').trim());
+    if(!name)return;
+    let p=DB.players.find(x=>x.name===name);
+    if(!p){p={name,score:null,confirmed:false};DB.players.push(p);}
+    if(sc!==undefined&&sc!==''){p.score=+sc;p.confirmed=true;ensureLine(+sc);}
+    n++;
+  });
+  $('#ap-bulk').value=''; syncRoster(); renderAdminPlayers(); renderAdminLines(); save(); toast(n+'명 등록/갱신');
+};
+$('#al-add').onclick=()=>{
+  const s=+$('#al-score').value, d=+$('#al-death').value||0;
+  if(!s)return;
+  if(lineOf(s)){toast('이미 있는 라인입니다.');return;}
+  DB.lines.push({score:s,death:d}); DB.lines.sort((a,b)=>b.score-a.score);
+  $('#al-score').value=''; renderAdminLines(); save();
+};
+
+function renderAll(){renderTeams();renderLines();renderStats();renderEntry();renderRoster();}
+</script>
+</body>
+</html>
