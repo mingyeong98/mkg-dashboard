@@ -44,6 +44,10 @@ function render(){
     document.getElementById('spaceSel').onchange=function(){ CUR_SPACE=this.value; SEL={}; load(); };
   } else sb.innerHTML='<div class="lbl" style="margin-top:0">내 카테고리</div><div class="stag">'+esc(d.me.space)+'</div>';
   document.getElementById('spaceTitle').textContent = d.space ? ' · '+d.space : (isMaster()?' · 전체':'');
+  var bx=document.getElementById('boardBox'); var bl=(d.boards||[]).filter(function(b){ return !d.space || b.space===d.space; });
+  var gs=function(id){ return 'https://docs.google.com/spreadsheets/d/'+id+'/edit'; };
+  bx.innerHTML = bl.length ? '<div class="lbl" style="margin-top:0">킬내기 시트</div>'+bl.map(function(b){ return '<div class="bset">'+(isMaster()?'<div class="bsn">'+esc(b.space)+'</div>':'')+'<a target="_blank" rel="noopener" href="'+gs(b.hell)+'">지옥연도</a><a target="_blank" rel="noopener" href="'+gs(b.dk)+'">대꼴룰</a><a target="_blank" rel="noopener" href="'+gs(b.bingo)+'">빙고</a></div>'; }).join('') : '';
+  bx.classList.toggle('hide', !bl.length);
   var pts={}; d.tiers.forEach(function(t){pts[t.key]=t;});
   var nav='';
   d.groups.forEach(function(g){
@@ -112,26 +116,31 @@ document.getElementById('loginBtn').onclick=function(){ run('logout',[TOKEN],fun
 document.getElementById('acctBtn').onclick=function(){
   var master=DATA&&DATA.me&&DATA.me.role==='master';
   var h='<h3>계정 관리</h3><label>내 비밀번호 변경</label><input id="cOld" type="password" placeholder="현재 비밀번호"><input id="cNew" type="password" placeholder="새 비밀번호 (6자 이상)" style="margin-top:6px"><div class="f" style="margin-top:8px"><button class="btn" id="cPw">비밀번호 변경</button></div>';
-  if(master) h+='<label style="margin-top:18px;color:var(--gold)">카테고리 관리 (마스터 전용)</label><div class="hint">관리자는 배정된 카테고리의 멤버·전적만 볼 수 있습니다.</div><div id="cSp" style="font-size:12px;color:var(--mut)">불러오는 중…</div><div class="rowin"><input id="spN" placeholder="새 카테고리 이름"><button class="btn" id="spAdd">추가</button></div>'+
-    '<label style="margin-top:18px;color:var(--gold)">관리자 계정 (마스터 전용)</label><div id="cList" style="font-size:12px;color:var(--mut)">불러오는 중…</div><input id="aId" placeholder="새 관리자 아이디" style="margin-top:8px"><input id="aPw" type="password" placeholder="비밀번호 (6자 이상)" style="margin-top:6px"><select id="aSp" style="margin-top:6px"></select><div class="f" style="margin-top:8px"><button class="btn" id="cAdd">관리자 추가</button></div>';
+  if(master) h+='<label style="margin-top:18px;color:var(--gold)">관리자 계정 (마스터 전용)</label><div class="hint">관리자를 추가하면 아이디 이름으로 카테고리와 킬내기 시트 3종(지옥연도·대꼴룰·빙고)이 새로 만들어지고, 팀뽑기 사이트 계정도 같은 아이디/비밀번호로 생성됩니다.</div><div id="cList" style="font-size:12px;color:var(--mut)">불러오는 중…</div>'+
+    '<input id="aId" placeholder="새 관리자 아이디 (= 카테고리 이름)" style="margin-top:8px"><input id="aPw" type="password" placeholder="비밀번호 (6자 이상)" style="margin-top:6px"><input id="aEm" placeholder="시트를 공유할 구글 이메일 (선택)" style="margin-top:6px">'+
+    '<div class="optbox"><div class="lbl" style="margin-top:0">킬내기 시트 점수 규칙 (지옥연도·대꼴룰)</div>'+
+    '<div class="og"><label>순위 방식</label><select id="oMode"><option>순위 입력</option><option>체크박스</option></select></div>'+
+    '<div class="og"><label>탑N 기준</label><input id="oN" type="number" value="10" min="1"></div>'+
+    '<div class="og"><label>지옥연도 탑N 밖 점수</label><input id="oHell" type="number" value="-4"></div>'+
+    '<div class="og"><label>대꼴룰 탑N 밖 점수</label><input id="oDk" type="number" value="0"></div>'+
+    '<div class="og"><label>치킨 점수 방식</label><select id="oCm"><option>모든 맵 동일</option><option>맵별</option></select></div>'+
+    '<div class="og"><label>치킨 점수</label><input id="oCp" type="number" value="7"></div>'+
+    '<div class="hint" style="margin-top:6px">순위 입력: 순위 1 = 치킨, N보다 큰 순위 = 탑N 밖 점수 · 체크박스: 순위 칸 없이 치킨/탑N 밖 체크로 합산 · 맵별 점수는 시트 [종합 순위] ⚙ 점수 설정에서 맵마다 바꿀 수 있어요</div></div>'+
+    '<div class="f" style="margin-top:8px"><button class="btn" id="cAdd">관리자 추가 + 시트 생성</button></div>';
   h+='<div class="f"><button class="btn" onclick="closeM()">닫기</button></div>';
   modal(h);
   document.getElementById('cPw').onclick=function(){ run('accountAction',[TOKEN,'changePw',{oldPw:document.getElementById('cOld').value,newPw:document.getElementById('cNew').value}],function(r){ toast(r.ok?'비밀번호가 변경되었습니다':r.msg); if(r.ok) closeM(); }); };
   if(master){
     var refresh=function(){ run('accountAction',[TOKEN,'list',{}],function(r){ if(!r.ok){toast(r.msg);return;}
-      var sps=r.spaces; DATA.spaces=sps;
-      var so=function(sel){ return sps.map(function(x){return '<option value="'+esc(x)+'"'+(x===sel?' selected':'')+'>'+esc(x)+'</option>';}).join(''); };
-      document.getElementById('cSp').innerHTML=sps.map(function(x){ return '<div class="row lrow"><span>'+esc(x)+'</span><span><button class="btn sbtn" data-ren="'+esc(x)+'">이름 변경</button> <button class="btn sbtn" data-del="'+esc(x)+'">삭제</button></span></div>'; }).join('');
-      document.getElementById('aSp').innerHTML=so(CUR_SPACE||sps[0]);
-      document.getElementById('cList').innerHTML=r.list.map(function(u){ return '<div class="row lrow"><span>'+esc(u.id)+' · '+(u.role==='master'?'마스터 (전체)':'관리자')+'</span>'+(u.role==='master'?'':'<span><select class="usp" data-id="'+esc(u.id)+'">'+so(u.space)+'</select> <button class="btn sbtn" data-rm="'+esc(u.id)+'">삭제</button></span>')+'</div>'; }).join('');
-      Array.prototype.forEach.call(document.querySelectorAll('#cList [data-rm]'),function(b){ b.onclick=function(){ var id=b.getAttribute('data-rm'); if(confirm(id+' 계정을 삭제할까요?')) run('accountAction',[TOKEN,'remove',{id:id}],function(r){ toast(r.ok?'삭제되었습니다':r.msg); refresh(); }); }; });
-      Array.prototype.forEach.call(document.querySelectorAll('#cList .usp'),function(sl){ sl.onchange=function(){ run('accountAction',[TOKEN,'setUserSpace',{id:sl.getAttribute('data-id'),space:sl.value}],function(r){ toast(r.ok?'담당 카테고리를 바꿨습니다':r.msg); refresh(); }); }; });
-      Array.prototype.forEach.call(document.querySelectorAll('#cSp [data-ren]'),function(b){ b.onclick=function(){ var o=b.getAttribute('data-ren'); var n=prompt('새 카테고리 이름',o); if(!n||n===o) return; run('accountAction',[TOKEN,'renameSpace',{from:o,to:n}],function(r){ toast(r.ok?'이름을 바꿨습니다':r.msg); if(r.ok&&CUR_SPACE===o) CUR_SPACE=n; refresh(); load(); }); }; });
-      Array.prototype.forEach.call(document.querySelectorAll('#cSp [data-del]'),function(b){ b.onclick=function(){ var n=b.getAttribute('data-del'); if(confirm(n+' 카테고리를 삭제할까요?')) run('accountAction',[TOKEN,'delSpace',{name:n}],function(r){ toast(r.ok?'삭제되었습니다':r.msg); if(r.ok&&CUR_SPACE===n) CUR_SPACE=''; refresh(); load(); }); }; });
+      document.getElementById('cList').innerHTML=r.list.map(function(u){ return '<div class="row lrow"><span>'+esc(u.id)+' · '+(u.role==='master'?'마스터 (전체 보기)':'관리자 · 카테고리 '+esc(u.space))+'</span>'+(u.role==='master'?'':'<button class="btn sbtn" data-rm="'+esc(u.id)+'">삭제</button>')+'</div>'; }).join('');
+      Array.prototype.forEach.call(document.querySelectorAll('#cList [data-rm]'),function(b){ b.onclick=function(){ var id=b.getAttribute('data-rm'); if(confirm(id+' 계정을 삭제할까요? (킬내기 시트와 기록은 남습니다)')) run('accountAction',[TOKEN,'remove',{id:id}],function(r){ toast(r.ok?'삭제되었습니다':r.msg); refresh(); }); }; });
     }); };
     refresh();
-    document.getElementById('spAdd').onclick=function(){ run('accountAction',[TOKEN,'addSpace',{name:document.getElementById('spN').value}],function(r){ toast(r.ok?'카테고리를 추가했습니다':r.msg); if(r.ok){ document.getElementById('spN').value=''; refresh(); load(); } }); };
-    document.getElementById('cAdd').onclick=function(){ run('accountAction',[TOKEN,'add',{id:document.getElementById('aId').value,pw:document.getElementById('aPw').value,space:document.getElementById('aSp').value}],function(r){ toast(r.ok?'관리자가 추가되었습니다':r.msg); if(r.ok){ document.getElementById('aId').value=''; document.getElementById('aPw').value=''; refresh(); } }); };
+    document.getElementById('cAdd').onclick=function(){ var btn=this; var g=function(i){ return document.getElementById(i).value; };
+      var opts={rankMode:g('oMode'),topN:g('oN'),hellOut:g('oHell'),dkOut:g('oDk'),chickenMode:g('oCm'),chicken:g('oCp')};
+      btn.disabled=true; btn.textContent='시트 만드는 중… (최대 1분)';
+      run('accountAction',[TOKEN,'add',{id:g('aId'),pw:g('aPw'),email:g('aEm'),opts:opts}],function(r){ btn.disabled=false; btn.textContent='관리자 추가 + 시트 생성';
+        if(!r.ok){ toast(r.msg); return; } toast('관리자 추가 완료 · 킬내기 시트 3종 생성 · '+(r.draft||'')); document.getElementById('aId').value=''; document.getElementById('aPw').value=''; document.getElementById('aEm').value=''; refresh(); load(); }); };
   }
 };
 document.getElementById('addBtn').onclick=function(){
