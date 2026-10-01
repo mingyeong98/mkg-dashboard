@@ -46,7 +46,7 @@ function render(){
   document.getElementById('spaceTitle').textContent = d.space ? ' · '+d.space : (isMaster()?' · 전체':'');
   var bx=document.getElementById('boardBox'); var bl=(d.boards||[]).filter(function(b){ return !d.space || b.space===d.space; });
   var gs=function(id){ return 'https://docs.google.com/spreadsheets/d/'+id+'/edit'; };
-  bx.innerHTML = bl.length ? '<div class="lbl" style="margin-top:0">킬내기 시트</div>'+bl.map(function(b){ return '<div class="bset">'+(isMaster()?'<div class="bsn">'+esc(b.space)+'</div>':'')+'<a target="_blank" rel="noopener" href="'+gs(b.hell)+'">지옥연도</a><a target="_blank" rel="noopener" href="'+gs(b.dk)+'">대꼴룰</a><a target="_blank" rel="noopener" href="'+gs(b.bingo)+'">빙고</a></div>'; }).join('') : '';
+  bx.innerHTML = bl.length ? '<div class="lbl" style="margin-top:0">킬내기 시트</div>'+bl.map(function(b){ return '<div class="bset">'+(isMaster()?'<div class="bsn">'+esc(b.space)+'</div>':'')+'<a target="_blank" rel="noopener" href="'+gs(b.tier)+'">티어표</a><a target="_blank" rel="noopener" href="'+gs(b.hell)+'">지옥연도</a><a target="_blank" rel="noopener" href="'+gs(b.dk)+'">대꼴룰</a><a target="_blank" rel="noopener" href="'+gs(b.bingo)+'">빙고</a></div>'; }).join('') : '';
   bx.classList.toggle('hide', !bl.length);
   var pts={}; d.tiers.forEach(function(t){pts[t.key]=t;});
   var nav='';
@@ -70,7 +70,7 @@ function render(){
       var scc=scol(g.g,s);html+='<div class="subsec" id="'+esc(g.g+'_'+s)+'"><h3><b style="display:flex;align-items:center;gap:8px"><i style="width:10px;height:10px;border-radius:3px;background:'+scc.bg+';display:inline-block"></i>'+esc(s)+'</b><span>'+sm.length+'명'+(t.pen?' · 패널티 '+(t.pen>0?'+':'')+t.pen:'')+'</span></h3>';
       if(!sm.length) html+='<div class="empty">등록된 멤버가 없습니다</div>';
       sm.forEach(function(m){
-        var chips=m.recent.map(function(r){var k=r.row+'';return '<div class="chip '+(r.res==='승'?'W':'L')+(SEL[k]?' sel':'')+'" title="'+esc(r.game)+'" onclick="pick('+r.row+','+m._i+',this)">'+esc(r.res)+'</div>';}).join('');
+        var chips=m.recent.map(function(r){var k=m.space+':'+r.row;return '<div class="chip '+(r.res==='승'?'W':'L')+(SEL[k]?' sel':'')+'" title="'+esc(r.game)+'" onclick="pick('+r.row+','+m._i+',this)">'+esc(r.res)+'</div>';}).join('');
         var ix=m._i;
         html+='<div class="pl" style="border-left:3px solid '+scol(m.g,m.s).bg+'"><div class="nm"><span class="badge" style="background:'+scol(m.g,m.s).bg+';color:'+scol(m.g,m.s).fg+';border-color:transparent">'+esc(shortName(m.name))+'</span><div class="full">'+esc(m.name)+'</div>'+(isMaster()&&!d.space?'<div class="sptag">'+esc(m.space)+'</div>':'')+'</div>'+
           '<div class="chips">'+(chips||'<span class="empty" style="grid-column:1/-1;padding:0">전적 없음</span>')+'</div>'+
@@ -100,7 +100,7 @@ function spaceOpts(sel){ return DATA.spaces.map(function(x){return '<option valu
 function spaceM(i){var m=DATA.members[i];modal('<h3>카테고리 이동 · '+esc(m.name)+'</h3><label>옮길 카테고리</label><select id="mS">'+spaceOpts(m.space)+'</select><div class="f"><button class="btn" onclick="closeM()">취소</button><button class="btn" id="mOk">이동</button></div>');
   document.getElementById('mOk').onclick=function(){var v=document.getElementById('mS').value;closeM();act('setSpace',{name:m.name,to:v},'카테고리를 옮겼습니다');};}
 function jump(id){var e=document.getElementById(id);if(e)e.scrollIntoView({behavior:'smooth',block:'start'});}
-function act(a,args,msg){ if(!TOKEN){toast('관리자 로그인이 필요합니다');return;} args=args||{}; if(args.space==null) args.space=CUR_SPACE;
+function act(a,args,msg){ if(!TOKEN){toast('관리자 로그인이 필요합니다');return;} args=args||{}; if(args.space==null){ var mm=(args.name&&DATA)?DATA.members.filter(function(x){return x.name===args.name;})[0]:null; args.space=mm?mm.space:CUR_SPACE; }
   run('adminAction',[TOKEN,a,args],function(r){ if(!r.ok){ if(/로그인/.test(r.msg)){TOKEN=null;try{sessionStorage.removeItem('bkg_tok');}catch(e){} showGate();} toast(r.msg); render(); return;} toast(msg||'저장되었습니다'); load(); }); }
 function tierOptions(sel){var o='';DATA.groups.forEach(function(g){g.subs.forEach(function(s){var v=g.g+'|'+s;o+='<option value="'+esc(v)+'"'+(v===sel?' selected':'')+'>'+esc(g.g==='BABY'||g.g==='미배정'?g.g:g.g+' '+s)+'</option>';});});return o;}
 function modal(h){document.getElementById('modal').innerHTML='<div class="mb" onclick="if(event.target===this)closeM()"><div class="card md">'+h+'</div></div>';}
@@ -109,14 +109,14 @@ function renameM(i){var n=DATA.members[i].name;modal('<h3>이름 수정</h3><lab
   document.getElementById('mOk').onclick=function(){var v=document.getElementById('mNew').value;closeM();act('rename',{name:n,newName:v},'이름 변경 완료');};}
 function moveM(i){var m=DATA.members[i];modal('<h3>티어 이동 · '+esc(m.name)+'</h3><label>새 티어</label><select id="mT">'+tierOptions(m.g+'|'+m.s)+'</select><div class="f"><button class="btn" onclick="closeM()">취소</button><button class="btn" id="mOk">이동</button></div>');
   document.getElementById('mOk').onclick=function(){var v=document.getElementById('mT').value.split('|');closeM();act('move',{name:m.name,g:v[0],s:v[1]},'티어 이동 완료');};}
-function pick(row,i,el){ if(!SELMODE) return; var name=DATA.members[i].name; var k=row+''; if(SEL[k]) delete SEL[k]; else SEL[k]={row:row,name:name}; el.classList.toggle('sel'); document.getElementById('selCnt').textContent=Object.keys(SEL).length; }
+function pick(row,i,el){ if(!SELMODE) return; var name=DATA.members[i].name; var sp=DATA.members[i].space; var k=sp+':'+row; if(SEL[k]) delete SEL[k]; else SEL[k]={row:row,name:name,space:sp}; el.classList.toggle('sel'); document.getElementById('selCnt').textContent=Object.keys(SEL).length; }
 document.getElementById('q').addEventListener('input',render);
 document.getElementById('allBtn').onclick=function(){document.getElementById('q').value='';render();};
 document.getElementById('loginBtn').onclick=function(){ run('logout',[TOKEN],function(){}); TOKEN=null; CUR_SPACE=''; try{sessionStorage.removeItem('bkg_tok');sessionStorage.removeItem('mkg_space');}catch(e){} DATA=null; SELMODE=false; SEL={}; document.getElementById('selBar').classList.add('hide'); showGate(); };
 document.getElementById('acctBtn').onclick=function(){
   var master=DATA&&DATA.me&&DATA.me.role==='master';
   var h='<h3>계정 관리</h3><label>내 비밀번호 변경</label><input id="cOld" type="password" placeholder="현재 비밀번호"><input id="cNew" type="password" placeholder="새 비밀번호 (6자 이상)" style="margin-top:6px"><div class="f" style="margin-top:8px"><button class="btn" id="cPw">비밀번호 변경</button></div>';
-  if(master) h+='<label style="margin-top:18px;color:var(--gold)">관리자 계정 (마스터 전용)</label><div class="hint">관리자를 추가하면 아이디 이름으로 카테고리와 킬내기 시트 3종(지옥연도·대꼴룰·빙고)이 새로 만들어지고, 팀뽑기 사이트 계정도 같은 아이디/비밀번호로 생성됩니다.</div><div id="cList" style="font-size:12px;color:var(--mut)">불러오는 중…</div>'+
+  if(master) h+='<label style="margin-top:18px;color:var(--gold)">관리자 계정 (마스터 전용)</label><div class="hint">관리자를 추가하면 아이디 이름으로 카테고리와 킬내기 티어표·점수판 3종(지옥연도·대꼴룰·빙고)이 새로 만들어지고, 팀뽑기 사이트 계정도 같은 아이디/비밀번호로 생성됩니다.</div><div id="cList" style="font-size:12px;color:var(--mut)">불러오는 중…</div>'+
     '<input id="aId" placeholder="새 관리자 아이디 (= 카테고리 이름)" style="margin-top:8px"><input id="aPw" type="password" placeholder="비밀번호 (6자 이상)" style="margin-top:6px"><input id="aEm" placeholder="시트를 공유할 구글 이메일 (선택)" style="margin-top:6px">'+
     '<div class="optbox"><div class="lbl" style="margin-top:0">킬내기 시트 점수 규칙 (지옥연도·대꼴룰)</div>'+
     '<div class="og"><label>순위 방식</label><select id="oMode"><option>순위 입력</option><option>체크박스</option></select></div>'+
@@ -140,7 +140,7 @@ document.getElementById('acctBtn').onclick=function(){
       var opts={rankMode:g('oMode'),topN:g('oN'),hellOut:g('oHell'),dkOut:g('oDk'),chickenMode:g('oCm'),chicken:g('oCp')};
       btn.disabled=true; btn.textContent='시트 만드는 중… (최대 1분)';
       run('accountAction',[TOKEN,'add',{id:g('aId'),pw:g('aPw'),email:g('aEm'),opts:opts}],function(r){ btn.disabled=false; btn.textContent='관리자 추가 + 시트 생성';
-        if(!r.ok){ toast(r.msg); return; } toast('관리자 추가 완료 · 킬내기 시트 3종 생성 · '+(r.draft||'')); document.getElementById('aId').value=''; document.getElementById('aPw').value=''; document.getElementById('aEm').value=''; refresh(); load(); }); };
+        if(!r.ok){ toast(r.msg); return; } toast('관리자 추가 완료 · 티어표·점수판 생성 · '+(r.draft||'')); document.getElementById('aId').value=''; document.getElementById('aPw').value=''; document.getElementById('aEm').value=''; refresh(); load(); }); };
   }
 };
 document.getElementById('addBtn').onclick=function(){
