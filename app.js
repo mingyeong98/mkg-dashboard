@@ -120,12 +120,12 @@ document.getElementById('acctBtn').onclick=function(){
     '<input id="aId" placeholder="새 관리자 아이디 (= 카테고리 이름)" style="margin-top:8px"><input id="aPw" type="password" placeholder="비밀번호 (6자 이상)" style="margin-top:6px"><input id="aEm" placeholder="시트를 공유할 구글 이메일 (선택)" style="margin-top:6px">'+
     '<div class="optbox"><div class="lbl" style="margin-top:0">킬내기 시트 점수 규칙 (킬내기·마이너스없는 킬내기)</div>'+
     '<div class="og"><label>순위 방식</label><select id="oMode"><option>순위 입력</option><option>체크박스</option></select></div>'+
-    '<div class="og"><label>탑N 기준</label><input id="oN" type="number" value="10" min="1"></div>'+
-    '<div class="og"><label>킬내기 탑N 밖 점수</label><input id="oHell" type="number" value="-4"></div>'+
-    '<div class="og"><label>마이너스없는 킬내기 탑N 밖 점수</label><input id="oDk" type="number" value="0"></div>'+
-    '<div class="og"><label>치킨 점수 방식</label><select id="oCm"><option>모든 맵 동일</option><option>맵별</option></select></div>'+
-    '<div class="og"><label>치킨 점수</label><input id="oCp" type="number" value="7"></div>'+
-    '<div class="hint" style="margin-top:6px">순위 입력: 순위 1 = 치킨, N보다 큰 순위 = 탑N 밖 점수 · 체크박스: 순위 칸 없이 치킨/탑N 밖 체크로 합산 · 맵별 점수는 시트 [종합 순위] ⚙ 점수 설정에서 맵마다 바꿀 수 있어요</div></div>'+
+    '<div class="og"><label>TOP N 기준</label><input id="oN" type="number" value="10" min="1"></div>'+
+    '<div class="og"><label>킬내기 TOP N 밖 점수</label><input id="oHell" type="number" value="-4"></div>'+
+    '<div class="og"><label>마이너스없는 킬내기 TOP N 밖 점수</label><input id="oDk" type="number" value="0"></div>'+
+    '<div class="og"><label>🍗 치킨 점수 방식</label><select id="oCm"><option>모든 맵 동일</option><option>맵별</option></select></div>'+
+    '<div class="og"><label>🍗 치킨 점수</label><input id="oCp" type="number" value="7"></div>'+
+    '<div class="hint" style="margin-top:6px">순위 입력: 순위 1 = 치킨, N보다 큰 순위 = TOP N 밖 점수 · 체크박스: 순위 칸 없이 🍗/TOP 체크로 합산 · TOP N 밖 점수를 0으로 두면 TOP 칸은 점수 없는 기록용 체크박스 · 맵별 점수는 시트 [종합 순위] ⚙ 점수 설정에서 맵마다 바꿀 수 있어요</div></div>'+
     '<div class="f" style="margin-top:8px"><button class="btn" id="cAdd">관리자 추가 + 시트 생성</button></div>';
   h+='<div class="f"><button class="btn" onclick="closeM()">닫기</button></div>';
   modal(h);
