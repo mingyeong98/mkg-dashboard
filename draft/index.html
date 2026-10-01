@@ -311,12 +311,80 @@ body.capture .hide-on-capture{display:none !important}
 }
 .toast.on{opacity:1}
 @media(prefers-reduced-motion:reduce){*{transition:none !important; animation:none !important}}
+
+/* ══════ 다크 그레이 스타일 ══════ */
+body.dark{
+  --paper:#121315; --mist:#1a1b1e; --veil:rgba(26,27,30,.92);
+  --ink:#e6e7ea; --ink2:#a2a5ad; --faint:#7c7f87; --ghost:#5d6068;
+  --edge:#2a2c31; --edge2:#34363c;
+  --holo:linear-gradient(100deg,#25262b 0%,#29262f 14%,#2c2629 28%,#2b2924 42%,#232a27 56%,#24282f 70%,#28252e 84%,#25262b 100%);
+  --holo-strong:linear-gradient(100deg,#6f87a8 0%,#8a7fae 13%,#a77f94 26%,#b0927c 39%,#6fa48f 52%,#7590b3 65%,#8d80ad 78%,#6f87a8 100%);
+  --holo-veil:linear-gradient(100deg,#1d1e22,#201e24,#221e21,#1d201f,#1d1e22);
+  --foil:repeating-linear-gradient(112deg,rgba(255,255,255,.035) 0 1px,rgba(255,255,255,0) 1px 5px);
+  --shadow:none; --shadow-lg:0 18px 50px rgba(0,0,0,.5);
+  background:var(--paper); color:var(--ink);
+}
+body.dark ::selection{background:#3a3d44}
+body.dark .holo-bar{opacity:.7}
+body.dark .btn{background:#202125;border-color:var(--edge2);color:var(--ink);box-shadow:none}
+body.dark .btn:hover{background:#26282c;border-color:#44474e;box-shadow:none}
+body.dark .btn.holo{background:var(--holo);background-size:300% 100%;color:#f0f0f2;border-color:#3c3e45;box-shadow:inset 0 1px 0 rgba(255,255,255,.04)}
+body.dark .btn.holo::after{background:linear-gradient(90deg,transparent,rgba(255,255,255,.08),transparent)}
+body.dark .btn.holo:hover{border-color:#55585f;box-shadow:inset 0 1px 0 rgba(255,255,255,.06)}
+body.dark .btn.mint{background:rgba(76,195,138,.08);border-color:#2c4a3d;color:#7fd3aa}
+body.dark .btn.rose{background:rgba(229,72,77,.08);border-color:#4a2c30;color:#ff8a8e}
+body.dark .btn.sky{background:rgba(77,124,240,.08);border-color:#2c3a55;color:#8fb0f5}
+body.dark .btn.ghost{background:transparent;border-color:transparent;color:var(--ink2)}
+body.dark .btn.ghost:hover{background:#202125}
+body.dark .fld,body.dark .ta,body.dark td input,body.dark .slot{background:#16171a;border-color:var(--edge)}
+body.dark .fld:focus,body.dark .ta:focus,body.dark .slot:focus,body.dark td input:focus{border-color:#4a4d55;box-shadow:none}
+body.dark .card-login,body.dark .team,body.dark .sec,body.dark .float,body.dark .ac,body.dark .toast{background:var(--mist);border-color:var(--edge)}
+body.dark .settings,body.dark .board{background:var(--mist);border-color:var(--edge);backdrop-filter:none}
+body.dark .team h3 em,body.dark .sec h3,body.dark .tierbox .h b,body.dark .ac div b{color:#e8c26a}
+body.dark .slot.filled{background:#202125;border-color:#3a3c42}
+body.dark .slot.captain{color:#f3f3f5;background:var(--holo);background-size:300% 100%;box-shadow:inset 0 0 0 1px #45474e}
+body.dark .slot.dropping{background:rgba(76,195,138,.08);border-color:#4cc38a;box-shadow:none}
+body.dark .pin{color:#e8c26a}
+body.dark .ac div:hover,body.dark .ac div.on{background:#26282c}
+body.dark .entry-strip{background:#16171a;border-color:#34363c}
+body.dark .echip{color:var(--ink);border-color:#3c3e45;box-shadow:none}
+body.dark .echip:hover{box-shadow:0 6px 16px rgba(0,0,0,.35)}
+body.dark .echip::after{background:linear-gradient(90deg,transparent,rgba(255,255,255,.08),transparent)}
+body.dark .echip .no{color:var(--faint)}
+body.dark .stat{background:#202125;border-color:var(--edge2)}
+body.dark .stat.a{color:#8fb0f5;border-color:#2c3a55;background:rgba(77,124,240,.08)}
+body.dark .stat.b{color:#7fd3aa;border-color:#2c4a3d;background:rgba(76,195,138,.08)}
+body.dark .pline{border-bottom-color:#25272b}
+body.dark .pline .score{color:var(--ink)}
+body.dark .pchip,body.dark .tchip{background:#202125;border-color:var(--edge2);box-shadow:none}
+body.dark .pchip.taken{background:#17181b;text-decoration-color:#5d6068}
+body.dark .pchip.taken::after{color:#e8c26a}
+body.dark .add-in{border-color:#34363c;color:var(--ink)}
+body.dark .add-in:focus{border-color:#4a4d55}
+body.dark .float-head{border-bottom-color:var(--edge)}
+body.dark .float-head .grip{color:var(--faint)}
+body.dark .tierbox{background:#16171a;border-color:var(--edge)}
+body.dark .tchip.no{background:rgba(229,72,77,.06);color:#e7a0b0}
+body.dark th,body.dark td{border-bottom-color:#25272b}
+body.dark .tbl-wrap{border-color:var(--edge)}
+body.dark .badge{border-color:var(--edge2)}
+body.dark .badge.ok{color:#7fd3aa;border-color:#2c4a3d;background:rgba(76,195,138,.08)}
+body.dark .err{color:#ff8a8e}
+body.dark b[style*="#7b6bb5"],body.dark b[style*="#8574c4"]{color:#e8c26a!important}
+body.dark .theme-tg{font-weight:700}
+.theme-fab{position:fixed;right:16px;top:14px;z-index:5}
+body:not(.dark) .btn:not(.mint):not(.rose):not(.sky):not(.ghost):not(.holo){background:var(--holo);background-size:300% 100%;animation:holoDrift 30s linear infinite;border-color:rgba(255,255,255,.95);box-shadow:0 1px 0 rgba(255,255,255,.95) inset,0 0 0 1px rgba(174,152,228,.28),0 3px 10px rgba(146,126,206,.12)}
+body:not(.dark) .btn.mint{background:linear-gradient(100deg,#e6f8f0,#e4f4ff 50%,#e6f8f0);background-size:300% 100%;animation:holoDrift 30s linear infinite}
+body:not(.dark) .btn.rose{background:linear-gradient(100deg,#fbe7f1,#fff0e8 50%,#fbe7f1);background-size:300% 100%;animation:holoDrift 30s linear infinite}
+body:not(.dark) .btn.sky{background:linear-gradient(100deg,#e4edff,#ece4fb 50%,#e4edff);background-size:300% 100%;animation:holoDrift 30s linear infinite}
 </style>
 </head>
 <body>
+<script>try{if((localStorage.getItem("mkg_theme")||"dark")!=="light")document.body.classList.add("dark")}catch(e){document.body.classList.add("dark")}</script>
 
 <!-- ═══════ 로그인 ═══════ -->
 <div id="screen-login">
+  <button class="btn sm theme-tg theme-fab"></button>
   <div class="card-login">
     <div class="holo-bar"></div>
     <h1 id="login-title">로그인</h1>
@@ -339,6 +407,7 @@ body.capture .hide-on-capture{display:none !important}
       <select id="space-sel" class="fld" style="width:auto;padding:6px 11px;font-weight:700"></select>
     </span>
     <span id="space-tag" class="badge ok hidden" style="margin-right:4px"></span>
+    <button class="btn theme-tg"></button>
     <a class="btn" href="../" style="text-decoration:none">MKG 대시보드</a>
     <button class="btn" id="go-admin">관리자 페이지</button>
     <button class="btn" id="go-pw">비밀번호 변경</button>
@@ -403,7 +472,7 @@ body.capture .hide-on-capture{display:none !important}
 
 <!-- ═══════ 관리자 ═══════ -->
 <div id="screen-admin" class="hidden">
-  <div class="topbar"><button class="btn" id="ad-back">← 드래프트로 돌아가기</button></div>
+  <div class="topbar"><button class="btn" id="ad-back" style="margin-right:auto">← 드래프트로 돌아가기</button><button class="btn theme-tg"></button></div>
   <div class="admin">
     <h2>관리자 페이지</h2>
     <p style="color:var(--ink2);font-size:12.5px;margin:4px 0 0">계정, 선수 티어, 포인트 라인을 관리합니다.</p>
@@ -1191,6 +1260,16 @@ $('#al-add').onclick=()=>{
 };
 
 function renderAll(){renderTeams();renderLines();renderStats();renderEntry();renderRoster();}
+
+/* 테마 전환 (대시보드와 같은 설정 공유) */
+(function(){
+  const label=()=>document.querySelectorAll('.theme-tg').forEach(b=>b.textContent=document.body.classList.contains('dark')?'☀ 밝은 버전':'☾ 다크 버전');
+  document.querySelectorAll('.theme-tg').forEach(b=>b.addEventListener('click',()=>{
+    const dark=!document.body.classList.contains('dark'); document.body.classList.toggle('dark',dark);
+    try{localStorage.setItem('mkg_theme',dark?'dark':'light')}catch(e){} label();
+  }));
+  label();
+})();
 </script>
 </body>
 </html>
