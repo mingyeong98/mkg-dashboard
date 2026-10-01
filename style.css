@@ -135,3 +135,4 @@ body.light .tier>.th{border-bottom-color:var(--line)}
 .og{display:flex;align-items:center;gap:8px;margin-top:6px}.og label{flex:1;margin:0!important;font-size:11.5px}.og input,.og select{width:46%!important}
 body.light .bset a{background:#f6f3ff;border-color:#e2dcf3;color:#4a4468}
 .bset a{white-space:nowrap;font-size:10.5px;padding:6px 2px;min-width:0}
+.bset a{white-space:normal;line-height:1.25}

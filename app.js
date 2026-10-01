@@ -46,7 +46,7 @@ function render(){
   document.getElementById('spaceTitle').textContent = d.space ? ' · '+d.space : (isMaster()?' · 전체':'');
   var bx=document.getElementById('boardBox'); var bl=(d.boards||[]).filter(function(b){ return !d.space || b.space===d.space; });
   var gs=function(id){ return 'https://docs.google.com/spreadsheets/d/'+id+'/edit'; };
-  bx.innerHTML = bl.length ? '<div class="lbl" style="margin-top:0">킬내기 시트</div>'+bl.map(function(b){ return '<div class="bset">'+(isMaster()?'<div class="bsn">'+esc(b.space)+'</div>':'')+'<a target="_blank" rel="noopener" href="'+gs(b.tier)+'">티어표</a><a target="_blank" rel="noopener" href="'+gs(b.hell)+'">지옥연도</a><a target="_blank" rel="noopener" href="'+gs(b.dk)+'">대꼴룰</a><a target="_blank" rel="noopener" href="'+gs(b.bingo)+'">빙고</a></div>'; }).join('') : '';
+  bx.innerHTML = bl.length ? '<div class="lbl" style="margin-top:0">킬내기 시트</div>'+bl.map(function(b){ return '<div class="bset">'+(isMaster()?'<div class="bsn">'+esc(b.space)+'</div>':'')+'<a target="_blank" rel="noopener" href="'+gs(b.tier)+'">티어표</a><a target="_blank" rel="noopener" href="'+gs(b.hell)+'">킬내기</a><a target="_blank" rel="noopener" href="'+gs(b.dk)+'">마이너스없는 킬내기</a><a target="_blank" rel="noopener" href="'+gs(b.bingo)+'">빙고 킬내기</a></div>'; }).join('') : '';
   bx.classList.toggle('hide', !bl.length);
   var pts={}; d.tiers.forEach(function(t){pts[t.key]=t;});
   var nav='';
@@ -116,13 +116,13 @@ document.getElementById('loginBtn').onclick=function(){ run('logout',[TOKEN],fun
 document.getElementById('acctBtn').onclick=function(){
   var master=DATA&&DATA.me&&DATA.me.role==='master';
   var h='<h3>계정 관리</h3><label>내 비밀번호 변경</label><input id="cOld" type="password" placeholder="현재 비밀번호"><input id="cNew" type="password" placeholder="새 비밀번호 (6자 이상)" style="margin-top:6px"><div class="f" style="margin-top:8px"><button class="btn" id="cPw">비밀번호 변경</button></div>';
-  if(master) h+='<label style="margin-top:18px;color:var(--gold)">관리자 계정 (마스터 전용)</label><div class="hint">관리자를 추가하면 아이디 이름으로 카테고리와 킬내기 티어표·점수판 3종(지옥연도·대꼴룰·빙고)이 새로 만들어지고, 팀뽑기 사이트 계정도 같은 아이디/비밀번호로 생성됩니다.</div><div id="cList" style="font-size:12px;color:var(--mut)">불러오는 중…</div>'+
+  if(master) h+='<label style="margin-top:18px;color:var(--gold)">관리자 계정 (마스터 전용)</label><div class="hint">관리자를 추가하면 아이디 이름으로 카테고리와 킬내기 티어표·점수판 3종(킬내기·마이너스없는 킬내기·빙고 킬내기)이 새로 만들어지고, 팀뽑기 사이트 계정도 같은 아이디/비밀번호로 생성됩니다.</div><div id="cList" style="font-size:12px;color:var(--mut)">불러오는 중…</div>'+
     '<input id="aId" placeholder="새 관리자 아이디 (= 카테고리 이름)" style="margin-top:8px"><input id="aPw" type="password" placeholder="비밀번호 (6자 이상)" style="margin-top:6px"><input id="aEm" placeholder="시트를 공유할 구글 이메일 (선택)" style="margin-top:6px">'+
-    '<div class="optbox"><div class="lbl" style="margin-top:0">킬내기 시트 점수 규칙 (지옥연도·대꼴룰)</div>'+
+    '<div class="optbox"><div class="lbl" style="margin-top:0">킬내기 시트 점수 규칙 (킬내기·마이너스없는 킬내기)</div>'+
     '<div class="og"><label>순위 방식</label><select id="oMode"><option>순위 입력</option><option>체크박스</option></select></div>'+
     '<div class="og"><label>탑N 기준</label><input id="oN" type="number" value="10" min="1"></div>'+
-    '<div class="og"><label>지옥연도 탑N 밖 점수</label><input id="oHell" type="number" value="-4"></div>'+
-    '<div class="og"><label>대꼴룰 탑N 밖 점수</label><input id="oDk" type="number" value="0"></div>'+
+    '<div class="og"><label>킬내기 탑N 밖 점수</label><input id="oHell" type="number" value="-4"></div>'+
+    '<div class="og"><label>마이너스없는 킬내기 탑N 밖 점수</label><input id="oDk" type="number" value="0"></div>'+
     '<div class="og"><label>치킨 점수 방식</label><select id="oCm"><option>모든 맵 동일</option><option>맵별</option></select></div>'+
     '<div class="og"><label>치킨 점수</label><input id="oCp" type="number" value="7"></div>'+
     '<div class="hint" style="margin-top:6px">순위 입력: 순위 1 = 치킨, N보다 큰 순위 = 탑N 밖 점수 · 체크박스: 순위 칸 없이 치킨/탑N 밖 체크로 합산 · 맵별 점수는 시트 [종합 순위] ⚙ 점수 설정에서 맵마다 바꿀 수 있어요</div></div>'+
