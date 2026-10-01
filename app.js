@@ -51,7 +51,7 @@ function render(){
   var pts={}; d.tiers.forEach(function(t){pts[t.key]=t;});
   var nav='';
   d.groups.forEach(function(g){
-    nav+='<div class="tgrp" style="border-color:'+rgba(gcol(g.g),.45)+'"><h4 style="color:'+tcol(gcol(g.g))+';background:'+rgba(gcol(g.g),.18)+'">'+esc(g.g)+'</h4><div class="tgrid">';
+    nav+='<div class="tgrp" style="border-color:'+(isLight()?rgba(gcol(g.g),.45):'var(--line)')+'"><h4 style="color:'+tcol(gcol(g.g))+';background:'+rgba(gcol(g.g),isLight()?.18:.1)+'">'+esc(g.g)+'</h4><div class="tgrid">';
     g.subs.forEach(function(s){var t=pts[g.g+'|'+s]||{};var p=(t.pts===''||t.pts==null)?'':' ('+t.pts+')';
       var sc=scol(g.g,s);nav+='<div style="box-shadow:inset 3px 0 0 '+sc.bg+'" onclick="jump(\''+esc(g.g+'_'+s)+'\')">'+esc(s)+p+'</div>';});
     nav+='</div></div>';
@@ -62,7 +62,7 @@ function render(){
   d.groups.forEach(function(g){
     var gm=d.members.filter(function(m){return m.g===g.g && (!q||m.name.indexOf(q)>=0);});
     if(q && !gm.length) return;
-    html+='<section class="card tier" style="border-color:'+rgba(gcol(g.g),.4)+'"><div class="th" style="background:linear-gradient(90deg,'+rgba(gcol(g.g),.32)+','+(isLight()?'rgba(255,255,255,0) 78%':'rgba(22,26,20,.2) 70%')+')"><h2 style="color:'+tcol(gcol(g.g))+'">'+esc(g.g)+'</h2><span class="cnt">'+gm.length+'명</span></div>';
+    html+='<section class="card tier" style="border-color:'+(isLight()?rgba(gcol(g.g),.4):'var(--line)')+'"><div class="th" style="'+(isLight()?'background:linear-gradient(90deg,'+rgba(gcol(g.g),.32)+',rgba(255,255,255,0) 78%)':'background:linear-gradient(90deg,'+rgba(gcol(g.g),.14)+',rgba(26,27,30,0) 55%);box-shadow:inset 3px 0 0 '+gcol(g.g))+'"><h2 style="color:'+tcol(gcol(g.g))+'">'+esc(g.g)+'</h2><span class="cnt">'+gm.length+'명</span></div>';
     g.subs.forEach(function(s){
       var sm=gm.filter(function(m){return m.s===s;});
       if(q && !sm.length) return;
