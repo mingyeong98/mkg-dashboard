@@ -362,7 +362,7 @@ body.capture .hide-on-capture{display:none !important}
       <div><label class="lbl">모드</label>
         <select id="s-mode" class="fld"><option>노말</option><option>경쟁</option><option>커스텀</option></select></div>
       <div><label class="lbl">점수판 연결</label>
-        <select id="s-board" class="fld" title="드래프트 팀이 내 카테고리의 킬내기 점수판 TEAM 탭으로 자동 입력됩니다"><option value="">없음</option><option>지옥연도</option><option>대꼴룰</option><option>빙고</option></select></div>
+        <select id="s-board" class="fld" title="드래프트 팀이 내 카테고리의 킬내기 점수판 TEAM 탭으로 자동 입력됩니다"><option value="">없음</option><option value="지옥연도">킬내기</option><option value="대꼴룰">마이너스없는 킬내기</option><option value="빙고">빙고 킬내기</option></select></div>
       <div><label class="lbl">팀 수</label><input id="s-teams" class="fld" type="number" min="1" step="1" value="6"></div>
       <div><label class="lbl">목표 총점(%)</label><div class="suffix"><input id="s-target" class="fld" type="number" value="100"><span>%</span></div></div>
       <div><label class="lbl">티어 모드</label>
@@ -424,7 +424,7 @@ body.capture .hide-on-capture{display:none !important}
     <div class="sec" id="sec-accounts"><div class="holo-bar"></div><div class="inner">
       <h3>계정 관리</h3>
       <p style="margin:-6px 0 12px;font-size:12px;color:var(--ink2);line-height:1.6">
-        계정을 추가하면 <b>아이디 이름으로 카테고리</b>와 킬내기 시트 3종(지옥연도·대꼴룰·빙고)이 자동으로 만들어지고, MKG 대시보드 계정도 같은 아이디/비밀번호로 생성됩니다.
+        계정을 추가하면 <b>아이디 이름으로 카테고리</b>와 티어표와 점수판 3종(킬내기·마이너스없는 킬내기·빙고 킬내기)이 자동으로 만들어지고, MKG 대시보드 계정도 같은 아이디/비밀번호로 생성됩니다.
         관리자는 자기 카테고리만, 최초 관리자는 모든 카테고리를 볼 수 있습니다.</p>
       <div class="tbl-wrap"><table><thead><tr><th style="width:30%">아이디</th><th style="width:30%">담당 카테고리</th><th style="width:22%">권한</th><th style="width:18%"></th></tr></thead><tbody id="ad-users"></tbody></table></div>
       <div class="inline-form">
@@ -684,7 +684,7 @@ function hydrate(){
   for(const [id,p] of Object.entries(D.panels||{})){const el=$('#'+id); if(el&&p){el.style.left=p.l;el.style.top=p.t;}}
 }
 $('#s-rule').onchange=e=>{D.settings.rule=e.target.value;save();};
-$('#s-mode').onchange=e=>{D.settings.mode=e.target.value;save();}; $('#s-board').onchange=e=>{D.settings.board=e.target.value;save();toast(e.target.value?e.target.value+' 점수판으로 팀이 자동 입력됩니다.':'점수판 연결을 해제했습니다.');};
+$('#s-mode').onchange=e=>{D.settings.mode=e.target.value;save();}; $('#s-board').onchange=e=>{D.settings.board=e.target.value;save();toast(e.target.value?e.target.selectedOptions[0].text+' 점수판으로 팀이 자동 입력됩니다.':'점수판 연결을 해제했습니다.');};
 $('#s-target').onchange=e=>{D.settings.target=+e.target.value;save();};
 $('#s-tier').onchange=e=>{D.settings.tier=e.target.value;save();};
 $('#s-teams').onchange=e=>{
