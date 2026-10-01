@@ -109,33 +109,6 @@ body{margin:0;background:var(--bg);color:var(--txt);font-family:'Noto Sans KR',s
 .lrow select{width:auto;padding:4px 6px;font-size:11.5px}
 .btn.sbtn{padding:4px 10px;font-size:11px}
 
-/* ===== 라이트 스타일 (파스텔) ===== */
-body.light{--bg:#f6f4fc;--card:#ffffff;--card2:#ffffff;--line:#e7e1f4;--txt:#2f2a45;--mut:#7a7394;--gold:#6f52d0;--red:#f06a8a;--blue:#5b8def;--green:#2f9e7e;
-  background:radial-gradient(900px 600px at 8% -10%,#ffe6ee 0%,transparent 60%),radial-gradient(880px 640px at 96% 4%,#dff1ff 0%,transparent 60%),radial-gradient(760px 700px at 50% 108%,#e2f8ef 0%,transparent 64%),#f6f4fc;background-attachment:fixed}
-body.light .card{background:#fff;border-color:var(--line);box-shadow:0 8px 26px rgba(120,100,180,.10)}
-body.light .head{background:linear-gradient(115deg,#fbe7f1 0%,#ece4fb 45%,#e4edff 100%);border-color:#fff}
-body.light .eyebrow{color:#8a6fe0}
-body.light .stat,body.light .tgrp,body.light .pl,body.light .ri{background:#fbfaff;border-color:var(--line)}
-body.light .tgrid div{color:#4a4468}
-body.light .tgrid div:hover{background:#f3eeff}
-body.light .search input,body.light .ssel,body.light .md input,body.light .md select,body.light .md textarea,body.light .gcard input{background:#fbfaff;border-color:#ddd6ef;color:var(--txt)}
-body.light .btn{background:#f1ecff;border-color:#d9cff7;color:#5b43b8}
-body.light .num{background:#f6f3ff;border-color:var(--line)}
-body.light .cnt{background:#fff;border-color:var(--line);color:var(--txt)}
-body.light .acts button{background:#fff;border-color:#e2dcf3;color:#4a4468}
-body.light .acts button.y{background:#fff8e6;border-color:#f3dca0;color:#9a6b00}
-body.light .acts button.r{background:#fff0f3;border-color:#f6c2d1;color:#c0456b}
-body.light .ri .n{background:#efe9ff;border-color:#d9cff7;color:#6f52d0}
-body.light .pill{background:#e9f8f2;border-color:#aae4d1;color:#2f8a70}
-body.light .stag{background:#efe9ff;border-color:#d9cff7;color:#6f52d0}
-body.light .b1{background:#eef3ff;border-color:#c9d7fb;color:#3b5bb5}
-body.light .b2{background:#fff6e6;border-color:#f3dca0;color:#9a6b00}
-body.light .b3{background:#fff0f3;border-color:#f6c2d1;color:#c0456b}
-body.light .b4{background:#e9f8f2;border-color:#aae4d1;color:#2f8a70}
-body.light .toast{background:#fff;border-color:var(--line);box-shadow:0 8px 24px rgba(120,100,180,.18)}
-body.light .gate{background:radial-gradient(900px 500px at 50% 0%,#ece4fb 0%,#f6f4fc 70%)}
-body.light .mb{background:rgba(60,50,90,.35)}
-body.light .tier>.th{border-bottom-color:var(--line)}
 .md{max-height:92vh;overflow:auto}
 .bset{display:flex;flex-wrap:wrap;gap:5px;margin-top:7px;align-items:center}
 .bset a{flex:1 1 40%;text-align:center;font-size:11px;font-weight:700;text-decoration:none;padding:6px 4px;border-radius:8px;background:var(--s2);border:1px solid var(--line);color:#c9cbd1}
@@ -143,7 +116,61 @@ body.light .tier>.th{border-bottom-color:var(--line)}
 .bsn{width:100%;font-size:11px;color:var(--mut);font-weight:700}
 .optbox{margin-top:10px;padding:10px;border:1px dashed var(--line);border-radius:10px}
 .og{display:flex;align-items:center;gap:8px;margin-top:6px}.og label{flex:1;margin:0!important;font-size:11.5px}.og input,.og select{width:46%!important}
-body.light .bset a{background:#f6f3ff;border-color:#e2dcf3;color:#4a4468}
 .bset a{white-space:nowrap;font-size:10.5px;padding:6px 2px;min-width:0}
 .bset a{white-space:normal;line-height:1.25}
-body.light .big:before{opacity:.9}body.light .pill:before{background:currentColor}body.light .stitle{border-color:var(--line);color:var(--gold)}body.light .tier>.th{background-color:transparent}body.light .gcard .go{background:#6f52d0;border-color:#6f52d0;color:#fff}body.light .ri .n{color:#6f52d0}
+/* ===== 라이트 스타일 · 파스텔 홀로그램 ===== */
+@keyframes holoDrift{0%{background-position:0% 50%}100%{background-position:300% 50%}}
+@keyframes sheen{0%{transform:translateX(-170%) skewX(-16deg);opacity:0}10%{opacity:.9}46%{opacity:.9}62%{opacity:0}100%{transform:translateX(260%) skewX(-16deg);opacity:0}}
+body.light{--bg:#f6f4fc;--card:#ffffff;--card2:#ffffff;--s1:#fbfaff;--s2:#f7f5fd;--hov:#f3eeff;--line:#ebe6f7;--line2:#ddd6ef;--txt:#3a3452;--mut:#7d7699;--gold:#7b62d6;--red:#f07a96;--blue:#6f97ef;--green:#2f9e7e;
+  --holo:linear-gradient(100deg,#e8f0ff 0%,#ece4fb 14%,#fbe7f1 28%,#fff2e6 42%,#e6f8f0 56%,#e4edff 70%,#efe6fc 84%,#e8f0ff 100%);
+  --holo-strong:linear-gradient(100deg,#bed8fb 0%,#cfc2f0 13%,#f6c8dd 26%,#ffd8c0 39%,#b9e8d7 52%,#c3d9fb 65%,#d3c4f1 78%,#bed8fb 100%);
+  --foil:repeating-linear-gradient(112deg,rgba(255,255,255,.6) 0 1px,rgba(255,255,255,0) 1px 5px);
+  background:radial-gradient(900px 620px at 8% -10%,#ffe6ee 0%,transparent 62%),radial-gradient(880px 640px at 96% 4%,#dff1ff 0%,transparent 60%),radial-gradient(760px 700px at 50% 108%,#e2f8ef 0%,transparent 64%),var(--bg);background-attachment:fixed}
+body.light ::-webkit-scrollbar-thumb{background:#ddd6ef}
+body.light .card{background:#fff;border-color:var(--line);box-shadow:0 6px 22px rgba(126,110,180,.10)}
+body.light .head{position:relative;overflow:hidden}
+body.light .head:before{content:'';position:absolute;left:0;right:0;top:0;height:3px;background:var(--holo-strong);background-size:300% 100%;animation:holoDrift 28s linear infinite}
+body.light .eyebrow{color:#9a88d6}
+body.light .dot{background:var(--holo-strong);background-size:300% 100%;animation:holoDrift 12s linear infinite;box-shadow:0 0 0 1px rgba(174,152,228,.4)}
+body.light .stat{background:var(--s1);border-color:var(--line)}
+body.light .tgrp,body.light .pl,body.light .ri{background:var(--s1)}
+body.light .pl:hover{border-color:var(--line2);box-shadow:0 4px 14px rgba(126,110,180,.1)}
+body.light .tgrid div{color:#4a4468}
+body.light .search input,body.light .ssel,body.light .md input,body.light .md select,body.light .md textarea,body.light .gcard input{background:#fff;border-color:var(--line2);color:var(--txt)}
+body.light .search input:focus,body.light .md input:focus,body.light .gcard input:focus,body.light .ssel:focus{border-color:#bda6ee;box-shadow:0 0 0 3px rgba(189,166,238,.2)}
+body.light .num{background:#fff;border-color:var(--line)}
+body.light .cnt{background:#fff;border-color:var(--line);color:var(--mut)}
+body.light .acts button{background:#fff;border-color:var(--line2);color:#4a4468}
+body.light .acts button.y{background:#fff8e6;border-color:#f3dca0;color:#9a6b00}
+body.light .acts button.r{background:#fff0f3;border-color:#f6c2d1;color:#c0456b}
+body.light .acts button:hover{box-shadow:0 3px 10px rgba(126,110,180,.15)}
+body.light .ri .n{background:#fff;border-color:var(--line2);color:var(--mut)}
+body.light .ri:nth-child(-n+3) .n{background:var(--holo);background-size:300% 100%;color:#5b47b0;border-color:#fff;box-shadow:0 0 0 1px rgba(174,152,228,.4)}
+body.light .pill{background:#e9f8f2;color:#2f8a70}
+body.light .stag,body.light .nm .badge{background:#f4efff;border-color:#ddd2f7;color:#6f52d0}
+body.light .stitle{border-color:var(--line2);color:var(--gold)}
+body.light .chip.L{background:#f07a96}body.light .chip.W{background:#6f97ef}
+body.light .bset a{background:#fff;border-color:var(--line2);color:#4a4468}
+body.light .bset a:hover{background:var(--hov)}
+body.light .toast{background:#fff;border-color:var(--line2);box-shadow:0 8px 24px rgba(120,100,180,.18)}
+body.light .gate{background:radial-gradient(900px 500px at 50% 0%,#ece4fb 0%,#f6f4fc 70%)}
+body.light .mb{background:rgba(60,50,90,.3)}
+/* 홀로그램 버튼 */
+body.light .btn,body.light .big{position:relative;overflow:hidden;isolation:isolate;background:var(--holo);background-size:300% 100%;animation:holoDrift 24s linear infinite;border:1px solid rgba(255,255,255,.95);color:#42395f;font-weight:700;
+  box-shadow:0 1px 0 rgba(255,255,255,.95) inset,0 0 0 1px rgba(174,152,228,.34),0 5px 16px rgba(146,126,206,.16);transition:box-shadow .15s,transform .15s}
+body.light .btn:before,body.light .big:after{content:'';position:absolute;inset:0;z-index:-1;background:var(--foil);opacity:.4;pointer-events:none}
+body.light .btn:after{content:'';position:absolute;top:-50%;bottom:-50%;left:0;width:34%;z-index:-1;background:linear-gradient(90deg,transparent,rgba(255,255,255,.92),transparent);transform:translateX(-170%) skewX(-16deg);animation:sheen 8s cubic-bezier(.4,0,.2,1) infinite;pointer-events:none}
+body.light .btn:hover,body.light .big:hover{transform:translateY(-1px);background:var(--holo);background-size:300% 100%;border-color:#fff;box-shadow:0 1px 0 rgba(255,255,255,.95) inset,0 0 0 1px rgba(160,133,224,.5),0 10px 26px rgba(140,118,204,.26)}
+body.light .btn:hover:after{animation-duration:2.6s}
+body.light .btn.sbtn{box-shadow:0 0 0 1px rgba(174,152,228,.3)}
+/* 큰 버튼: 파스텔 색별 + 홀로그램 */
+body.light .big:before{width:4px;top:9px;bottom:9px;background:var(--holo-strong);background-size:100% 300%}
+body.light .b1{background:linear-gradient(100deg,#e4edff,#ece4fb 50%,#e8f0ff);background-size:300% 100%;color:#4a5fb0}
+body.light .b2{background:linear-gradient(100deg,#fff2e6,#fff7d6 45%,#fbe7f1 80%,#fff2e6);background-size:300% 100%;color:#94650a}
+body.light .b3{background:linear-gradient(100deg,#fbe7f1,#ffe3ea 45%,#efe6fc 85%,#fbe7f1);background-size:300% 100%;color:#b44a6c}
+body.light .b4{background:linear-gradient(100deg,#e6f8f0,#e4f4ff 50%,#ece4fb 85%,#e6f8f0);background-size:300% 100%;color:#2c8169}
+body.light .b1:before{background:#9fb6f5}body.light .b2:before{background:#f4c77a}body.light .b3:before{background:#f4a3bb}body.light .b4:before{background:#8fdcc0}
+body.light .gcard .go{color:#42395f}
+body.light #selDo{color:#c0456b!important}
+.acol .big:nth-child(2){animation-delay:-5s}.acol .big:nth-child(3){animation-delay:-11s}.acol .big:nth-child(4){animation-delay:-17s}.acol .big:nth-child(5){animation-delay:-23s}
+@media(prefers-reduced-motion:reduce){body.light *{animation:none!important}}
