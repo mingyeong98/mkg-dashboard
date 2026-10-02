@@ -46,7 +46,7 @@ function render(){
   document.getElementById('spaceTitle').textContent = d.space ? ' · '+d.space : (isMaster()?' · 전체':'');
   var bx=document.getElementById('boardBox'); var bl=(d.boards||[]).filter(function(b){ return !d.space || b.space===d.space; });
   var gs=function(id){ return 'https://docs.google.com/spreadsheets/d/'+id+'/edit'; };
-  bx.innerHTML = bl.length ? '<div class="lbl" style="margin-top:0">킬내기 시트</div>'+bl.map(function(b){ return '<div class="bset">'+(isMaster()?'<div class="bsn">'+esc(b.space)+'</div>':'')+'<a target="_blank" rel="noopener" href="'+gs(b.tier)+'">티어표</a><a target="_blank" rel="noopener" href="'+gs(b.hell)+'">킬내기</a><a target="_blank" rel="noopener" href="'+gs(b.dk)+'">마이너스없는 킬내기</a><a target="_blank" rel="noopener" href="'+gs(b.bingo)+'">빙고 킬내기</a>'+(b.kanbu?'<a target="_blank" rel="noopener" href="'+gs(b.kanbu)+'">깐부 킬내기</a>':'')+'</div>'; }).join('') : '';
+  bx.innerHTML = bl.length ? '<div class="lbl" style="margin-top:0">킬내기 시트</div>'+bl.map(function(b){ return '<div class="bset">'+(isMaster()?'<div class="bsn">'+esc(b.space)+'</div>':'')+'<a target="_blank" rel="noopener" href="'+gs(b.tier)+'">티어표</a><a target="_blank" rel="noopener" href="'+gs(b.hell)+'">킬내기</a><a target="_blank" rel="noopener" href="'+gs(b.dk)+'">마이너스없는 킬내기</a><a target="_blank" rel="noopener" href="'+gs(b.bingo)+'">빙고 킬내기</a>'+(b.kanbu?'<a target="_blank" rel="noopener" href="'+gs(b.kanbu)+'">깐부 킬내기</a>':'')+(b.kanbu5?'<a target="_blank" rel="noopener" href="'+gs(b.kanbu5)+'">깐부 5파전+</a>':'')+'</div>'; }).join('') : '';
   bx.classList.toggle('hide', !bl.length);
   var pts={}; d.tiers.forEach(function(t){pts[t.key]=t;});
   var nav='';
